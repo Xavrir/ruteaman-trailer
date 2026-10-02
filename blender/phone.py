@@ -23,18 +23,18 @@ from mathutils import Matrix, Vector
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MM = 0.001
 
-# Size: the active area keeps the screen video's 1080:2340 aspect, so the texture is never stretched.
+# Size: the active area keeps the recordings' 1080:2400 aspect (Pixel 7 emulator), so the texture is never stretched.
 H = 152 * MM
 T = 8 * MM
 GLASS_INSET = 0.9 * MM  # frame lip around the front glass
 BEZEL = 1.3 * MM  # black border between the glass edge and the active area
 AH = H - 2 * (GLASS_INSET + BEZEL)
-AW = AH * 1080 / 2340
+AW = AH * 1080 / 2400
 W = AW + 2 * (GLASS_INSET + BEZEL)
 R = 10 * MM  # outline corner radius
 ZG = T / 2 + 0.25 * MM  # front glass surface
 
-TEX_W, TEX_H = 1080, 2340
+TEX_W, TEX_H = 1080, 2400
 
 
 def tex_to_local(px, py):

@@ -1,0 +1,24 @@
+{
+  "hook": {
+    "film_start": 0,
+    "frames": 205,
+    "segments": [["s1-explore-t1.mp4", 1.97, 9.0, 1.0]]
+  },
+  "route": {
+    "film_start": 525,
+    "frames": 450,
+    "segments": [
+      ["s23-route-t3.mp4", 2.60, 9.40, 1.6],
+      ["s23-route-t3.mp4", 9.40, 11.54, 1.0],
+      ["s23-route-t3.mp4", 11.54, 18.40, 2.0],
+      ["s23-route-t3.mp4", 18.40, 19.40, 1.0],
+      ["s23-route-t3.mp4", 19.40, 23.40, 2.0],
+      ["s23-route-t3.mp4", 23.40, 26.40, 1.0]
+    ]
+  },
+  "end": {
+    "film_start": 1440,
+    "frames": 186,
+    "segments": [["s23-route-t3.mp4", 7.80, 14.20, 1.0]]
+  }
+}

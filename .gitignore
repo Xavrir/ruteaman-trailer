@@ -10,3 +10,5 @@ out/*.webm
 out/.*transaction*
 blender/render/
 .transcode-cache/
+screens-real/raw/
+assets/screens-real/*.mp4.tmp
