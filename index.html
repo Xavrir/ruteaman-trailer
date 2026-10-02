@@ -148,8 +148,10 @@
             <circle cx="0" cy="0" r="17" fill="#fff" stroke="#0c0c0d" stroke-width="6" />
           </g>
           <g id="nav-dot" opacity="0">
-            <circle cx="0" cy="0" r="40" fill="#fff" fill-opacity="0.16" />
-            <circle cx="0" cy="0" r="17" fill="#fff" stroke="#0c0c0d" stroke-width="6" />
+            <g id="nav-core">
+              <circle cx="0" cy="0" r="40" fill="#fff" fill-opacity="0.16" />
+              <circle cx="0" cy="0" r="17" fill="#fff" stroke="#0c0c0d" stroke-width="6" />
+            </g>
           </g>
         </svg>
       </div>
@@ -348,12 +350,17 @@
       const traveled = document.getElementById("traveled");
       traveled.setAttribute("d", safe.path.getAttribute("d"));
       traveled.style.strokeDasharray = `${safe.len} ${safe.len}`;
+      const navCore = document.getElementById("nav-core");
       const placeNav = () => {
         traveled.style.strokeDashoffset = `${safe.len * (1 - nav.p)}`;
         const t = Math.min(Math.max(nav.p, 0), 1) * NAV_STEPS;
         const i = Math.min(Math.floor(t), NAV_STEPS - 1), k = t - i;
         const [x0, y0] = navTable[i], [x1, y1] = navTable[i + 1];
-        navDot.setAttribute("transform", `translate(${x0 + (x1 - x0) * k} ${y0 + (y1 - y0) * k})`);
+        const x = x0 + (x1 - x0) * k, y = y0 + (y1 - y0) * k;
+        navDot.setAttribute("transform", `translate(${x} ${y})`);
+        // The dot dissolves into the home marker over its last 46 px, so the two never show as a double ring.
+        const dist = Math.hypot(x - DEST[0], y - DEST[1]);
+        navCore.setAttribute("opacity", Math.min(Math.max((dist - 6) / 40, 0), 1).toFixed(3));
       };
       placeNav();
 
@@ -378,7 +385,49 @@
       const rise = (tl, target, at, dur = 0.9, dy = 28) =>
         tl.fromTo(target, { opacity: 0, y: dy }, { opacity: 1, y: 0, duration: dur, ease: OUT }, at);
 
-      const tl = gsap.timeline({ paused: true });
+      // The world layer's transform is a pure function of film time (frames can render in any order).
+      // Handoff: [frame, puck x, puck y, frame px per screen px] from blender/hook-align.json; the screen's
+      // map relates to map-wide.jpg by the affine in screens-real/align.json.
+      const HANDOFF = [[182, 1303.84, 484.32, 0.76958], [183, 1288.14, 499.48, 0.90753], [184, 1269.96, 517.02, 1.06707], [185, 1249.36, 536.88, 1.24768], [186, 1226.56, 558.86, 1.44742], [187, 1202.03, 582.5, 1.66223], [188, 1176.57, 607.02, 1.88511], [189, 1151.34, 631.31, 2.10581], [190, 1127.85, 653.93, 2.31133], [191, 1107.73, 673.31, 2.48744], [192, 1092.45, 688.01, 2.62104], [193, 1083.09, 697.03, 2.703], [194, 1080.0, 700.0, 2.73]];
+      const TEX_TO_MAP = [[2.880342, -0.318927, -849.450297], [-0.016617, 2.725965, -948.41264]];
+      const PUCK = [558, 776];
+      const K0 = 2095 / 2160;
+      const mul = (p, q) => [p[0] * q[0] + p[2] * q[1], p[1] * q[0] + p[3] * q[1], p[0] * q[2] + p[2] * q[3], p[1] * q[2] + p[3] * q[3], p[0] * q[4] + p[2] * q[5] + p[4], p[1] * q[4] + p[3] * q[5] + p[5]];
+      const inv = (p) => {
+        const det = p[0] * p[3] - p[1] * p[2];
+        const a = p[3] / det, b = -p[1] / det, c = -p[2] / det, d = p[0] / det;
+        return [a, b, c, d, -(a * p[4] + c * p[5]), -(b * p[4] + d * p[5])];
+      };
+      const [[t00, t01, t02], [t10, t11, t12]] = TEX_TO_MAP;
+      // Texture px -> world layer px before its own transform (map image at left 188, top -32, K0 px per map px).
+      const L = mul([K0, 0, 0, K0, 188, -32], [t00, t10, t01, t11, t02, t12]);
+      const Linv = inv(L);
+      const handoffAt = ([, X, Y, m]) => mul([m, 0, 0, m, X - m * PUCK[0], Y - m * PUCK[1]], Linv);
+      const ID = [1, 0, 0, 1, 0, 0];
+      const lerpM = (p, q, k) => p.map((v, i) => v + (q[i] - v) * k);
+      const settle = gsap.parseEase("power3.inOut");
+      const ARRIVE = [1.35, 0, 0, 1.35, -451 + 960 * (1 - 1.35), 232 + 540 * (1 - 1.35)];
+      const SETTLE_F = 57;
+      function worldMatrix(fr) {
+        if (fr >= 1349) return ARRIVE;
+        const last = HANDOFF[HANDOFF.length - 1];
+        if (fr <= HANDOFF[0][0]) return handoffAt(HANDOFF[0]);
+        if (fr < last[0]) {
+          const i = HANDOFF.findIndex((r) => r[0] > fr) - 1;
+          const a = HANDOFF[i], b = HANDOFF[i + 1], k = (fr - a[0]) / (b[0] - a[0]);
+          return lerpM(handoffAt(a), handoffAt(b), k);
+        }
+        const k = Math.min((fr - last[0]) / SETTLE_F, 1);
+        return lerpM(handoffAt(last), ID, settle(k));
+      }
+      const worldEls = [document.getElementById("world"), document.getElementById("rworld")];
+      const applyWorld = (time) => {
+        const m = worldMatrix(time * FPS);
+        const css = `matrix(${m.map((v) => v.toFixed(5)).join(",")})`;
+        worldEls.forEach((n) => { n.style.transformOrigin = "0 0"; n.style.transform = css; });
+      };
+
+      const tl = gsap.timeline({ paused: true, onUpdate: () => applyWorld(tl.time()) });
 
       // Shot 1, hook (f0-200): the real explore screen; its sheet slides down (f125-160), then the camera pushes
       // into the location puck and lands at f194 with the screen filling the frame.
@@ -393,22 +442,10 @@
 
       // Shot 2, problem (f200-400). The flat map takes over from the phone's map at the puck, at the scale the
       // screen shows it, then pulls out to the neighbourhood.
-      tl.set("#world, #rworld", { transformOrigin: "960px 540px" }, 0);
       tl.fromTo("#world, #rworld", { opacity: 0 }, { opacity: 1, duration: f(12), ease: "none" }, f(186));
-      // [frame, puck x, puck y, frame px per screen px] from blender/hook-align.json. One screen px of the
-      // recording covers 1/1.4 px of map-wide.jpg (measured on shared landmarks), which sits at K0 frame px per px.
-      const HANDOFF = [[184, 1246.92, 537.1, 0.95357], [185, 1225.35, 558.17, 1.08898], [186, 1202.61, 580.36, 1.23157], [187, 1179.4, 603.02, 1.37711], [188, 1156.56, 625.3, 1.52023], [189, 1135.11, 646.23, 1.65465], [190, 1116.1, 664.78, 1.77377], [191, 1100.51, 679.99, 1.87149], [192, 1089.08, 691.14, 1.94312], [193, 1082.23, 697.83, 1.98603], [194, 1080.0, 700.0, 2.0]];
-      const K0 = 2095 / 2160;
-      const SCREEN_TO_MAP = 1.4;
-      const startBase = [188 + START[0] * K0, -32 + START[1] * K0];
-      const worldAt = ([, X, Y, m]) => {
-        const scale = (m * SCREEN_TO_MAP) / K0;
-        return { x: X - 960 - scale * (startBase[0] - 960), y: Y - 540 - scale * (startBase[1] - 540), scale };
-      };
-      HANDOFF.forEach((row) => tl.set("#world, #rworld", worldAt(row), f(row[0])));
-      tl.fromTo("#world, #rworld", worldAt(HANDOFF[HANDOFF.length - 1]), { x: 0, y: 0, scale: 1, duration: 1.9, ease: "power3.inOut", immediateRender: false }, f(196));
       tl.fromTo("#scrim", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power2.out" }, f(212));
-      tl.fromTo("#dest-dot", { opacity: 0, scale: 0.4, transformOrigin: "1400px 305px" }, { opacity: 1, scale: 1, duration: 0.7, ease: OUT }, f(240));
+      tl.fromTo("#dest-dot", { opacity: 0, scale: 0.4, svgOrigin: "1400 305" }, { opacity: 1, scale: 1, duration: 0.7, ease: OUT }, f(240));
+      tl.fromTo("#start-dot", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, f(240));
       reveal(tl, "#prob-a", f(225));
       tl.to(plain, { strokeDashoffset: 0, duration: 2, ease: "power2.inOut" }, f(250));
       tl.to("#quiet", { opacity: 1, duration: 1.2, ease: "power2.out" }, f(268));
@@ -430,12 +467,12 @@
       tl.fromTo("#logo-png", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.inOut" }, f(450));
       tl.to("#logo-draw", { opacity: 0, duration: 0.3, ease: "none" }, f(462));
       reveal(tl, "#brand-wm", f(450), 1.0);
-      tl.to(["#brand-logo", "#brand-wm"], { opacity: 0, scale: 0.97, duration: 0.6, ease: "power2.in" }, f(505));
+      tl.to(["#brand-logo", "#brand-wm"], { opacity: 0, y: -80, duration: 0.8, ease: "power2.in" }, f(500));
 
       // Shots 4 and 5, one 3D shot (f525-925): the phone turns in while the real search plays; the route ribbon
       // draws on screen at b28 (f694-712), the four signals follow on eighth notes; the alternative is tapped at
       // b33 (f825) as the camera pushes in, and Rute Aman is chosen again at f898.
-      tl.fromTo("#v-route", { opacity: 0 }, { opacity: 1, duration: f(12), ease: "power1.out" }, f(525));
+      tl.fromTo("#v-route", { opacity: 0 }, { opacity: 1, duration: f(6), ease: "power1.out" }, f(525));
       reveal(tl, "#rt-a", f(700));
       reveal(tl, "#rt-b", f(750));
       tl.to("#rt-a", { color: DIM, duration: 0.6, ease: "power2.out" }, f(750));
@@ -471,22 +508,24 @@
       tl.set("#m-safe-path", { strokeDashoffset: 0 }, f(1349));
       tl.set("#start-dot", { opacity: 0 }, f(1349));
       tl.set(navDot, { opacity: 1 }, f(1349));
-      tl.set("#dest-dot", { opacity: 1, scale: 1 }, f(1349));
-      tl.set("#world, #rworld", { x: -451, y: 232, scale: 1.35, opacity: 1 }, f(1350));
-      tl.set("#scrim", { opacity: 1 }, f(1350));
-      tl.set(nav, { p: 0.86, onUpdate: placeNav }, f(1349));
-      tl.to(nav, { p: 1, duration: f(25), ease: "power2.out", onUpdate: placeNav }, f(1350));
-      tl.to("#dest-dot", { fill: MINT, stroke: MINT, duration: 0.4, ease: "power2.out" }, f(1375));
-      tl.fromTo("#dest-ring", { opacity: 0.9, scale: 1, transformOrigin: "1400px 305px" }, { opacity: 0, scale: 3.2, duration: 1.2, ease: "power2.out", immediateRender: false }, f(1375));
-      tl.to(navDot, { opacity: 0, duration: 0.3 }, f(1375));
-      reveal(tl, "#arr-title", f(1358));
-      rise(tl, "#arr-sub", f(1378));
-      tl.to(["#arr-title", "#arr-sub"], { opacity: 0, duration: 0.6, ease: "power2.in" }, f(1440));
-      tl.to("#world, #rworld", { opacity: 0, duration: 0.9, ease: "power2.inOut" }, f(1440));
-      tl.to("#scrim", { opacity: 0, duration: 0.9, ease: "power2.inOut" }, f(1440));
-      // The phone turns from its back (visible once the map has gone, f1454) and settles at b62 (f1550) as the
-      // real route ribbon finishes drawing on its screen; the text column lands on b59 to b61.
-      tl.fromTo("#v-end", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, f(1454));
+      tl.set("#dest-dot", { opacity: 1, scale: 1, svgOrigin: "1400 305" }, f(1349));
+      tl.set("#scrim", { opacity: 1 }, f(1349));
+      tl.set("#world, #rworld", { opacity: 1 }, f(1350));
+      // Hard cut in from SOS with the dot mid-route; it eases into home on b56 (f1400) and merges into the marker.
+      tl.fromTo(nav, { p: 0.42 }, { p: 1, duration: f(50), ease: "power2.out", onUpdate: placeNav, immediateRender: false }, f(1350));
+      tl.set(nav, { p: 0.42, onUpdate: placeNav }, f(1349));
+      tl.to("#dest-dot", { fill: MINT, stroke: MINT, duration: f(8), ease: "power2.out" }, f(1394));
+      tl.to("#dest-dot", { scale: 1.2, duration: f(6), ease: "power2.out" }, f(1394));
+      tl.to("#dest-dot", { scale: 1, duration: f(14), ease: "power2.inOut" }, f(1400));
+      tl.fromTo("#dest-ring", { opacity: 0.9, scale: 1, svgOrigin: "1400 305" }, { opacity: 0, scale: 3.2, duration: 1.2, ease: "power2.out", immediateRender: false }, f(1398));
+      reveal(tl, "#arr-title", f(1400));
+      rise(tl, "#arr-sub", f(1406));
+      tl.to(["#arr-title", "#arr-sub"], { opacity: 0, duration: 0.5, ease: "power2.in" }, f(1458));
+      tl.to("#world, #rworld", { opacity: 0, duration: 0.8, ease: "power2.inOut" }, f(1456));
+      tl.to("#scrim", { opacity: 0, duration: 0.8, ease: "power2.inOut" }, f(1456));
+      // The phone turns from its back and settles at b62 (f1550) as the real route ribbon finishes drawing on its
+      // screen; the text column lands on b59 to b61.
+      tl.fromTo("#v-end", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, f(1466));
       rise(tl, "#lockup", f(1475), 0.9, 24);
       reveal(tl, "#tagline", f(1500), 1.0, f(5));
       rise(tl, "#subline", f(1515), 0.8, 20);
@@ -494,6 +533,7 @@
 
       window.__timelines["main"] = tl;
       tl.seek(0);
+      applyWorld(0);
     </script>
   </body>
 </html>

@@ -1,0 +1,15 @@
+{
+ "note": "Affine from hook screen texture px (1080x2400) to map-wide.jpg px, ECC-refined on road edges",
+ "tex_to_map": [
+  [
+   2.880342,
+   -0.318927,
+   -849.450297
+  ],
+  [
+   -0.016617,
+   2.725965,
+   -948.41264
+  ]
+ ]
+}

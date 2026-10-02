@@ -488,7 +488,8 @@ SHOTS = {
 }
 
 # The hook pushes into the location puck of the real recording (texture px).
-PUCK = (540, 780)
+PUCK = (558, 776)
+LAND_SCALE = 2.73
 
 
 def frame_px_per_m(d, lens=85):
@@ -532,10 +533,11 @@ def anim_hook(rig, cam, lights, glass_bsdf, focus):
     cam.rotation_euler = (0, 0, 0)
     key(cam, "location", 0, (-400 / ppm0, 0.004, d0))
     key(cam, "location", 164, (-400 / ppm0, 0.0, d0))
-    # Handoff at b8: the push lands at f194 with the puck on frame (1080, 700) at 2 frame px per screen px, so the
-    # screen covers the whole frame and index.html can dissolve into the flat map without a bezel in view.
+    # Handoff at b8: the push lands at f194 with the puck on frame (1080, 700) at 2.73 frame px per screen px. At
+    # that scale the recording's map matches map-wide.jpg in the problem shot, so index.html can take over with
+    # the flat map at its own scale (screens-real/align.json).
     dot = tex_to_local(*PUCK)
-    ppm1 = 2.0 / (AW / TEX_W)
+    ppm1 = LAND_SCALE / (AW / TEX_W)
     d1 = 1920 * 0.085 / (0.036 * ppm1)
     key(cam, "location", 194, (dot.x - 120 / ppm1, dot.y + 160 / ppm1, ZG + d1))
     key(cam, "location", 204, (dot.x - 120 / ppm1, dot.y + 160 / ppm1, ZG + d1))
@@ -563,7 +565,7 @@ def anim_protect(rig, cam, lights, focus):
     cam.data.dof.focus_object = focus
     d = 0.86
     ppm = frame_px_per_m(d)
-    off = -380 / ppm  # phone centre at frame x 1340
+    off = -300 / ppm  # phone centre at frame x 1260
     # Slow 10 deg orbit around the phone. The camera aims left of the phone so it sits at frame x 1340.
     for f, a in ((1090, -14.0), (1252, -4.0)):
         ar = math.radians(a)
@@ -600,15 +602,15 @@ def anim_route(rig, cam, lights, focus):
     d = 0.80
     ppm = frame_px_per_m(d)
     # Enters low and edge-on from the black brand shot, turns to 3/4 and settles on b24 (f600).
-    key(rig, "rotation_euler", 525, deg(14, -78, -6))
+    key(rig, "rotation_euler", 525, deg(16, -58, -6))
     key(rig, "rotation_euler", 600, deg(4, -24, -1.5))
     key(rig, "rotation_euler", 800, deg(3, -19, -1))
-    key(rig, "location", 525, (0.018, -0.105, -0.06))
+    key(rig, "location", 525, (0.012, -0.085, -0.04))
     key(rig, "location", 600, (0, 0, 0))
     key(rig, "location", 800, (0, 0.003, 0))
-    key(cam, "location", 525, (-380 / ppm, 0.0, d))
-    key(cam, "location", 600, (-380 / ppm, 0.0, d))
-    key(cam, "location", 800, (-380 / ppm, 0.0, d - 0.025))
+    key(cam, "location", 525, (-290 / ppm, 0.0, d))
+    key(cam, "location", 600, (-290 / ppm, 0.0, d))
+    key(cam, "location", 800, (-290 / ppm, 0.0, d - 0.025))
     # Push: the option rows (texture y ~1950) move toward frame centre-right as the alternative is tapped.
     rot_end, loc_end = deg(1.5, -12, -0.5), Vector((0, 0.003, 0))
     key(rig, "rotation_euler", 924, rot_end)
@@ -634,12 +636,17 @@ def anim_macro(rig, cam, lights, focus):
     place_camera(cam, 974, rig_point(rig, rot1, Vector((0, 0, 0)), spot + Vector((0, -3 * MM, 0))), (820, 560), 0.19)
     focus.location = spot
     # Low key so the side face goes dark and the chamfer reads as one crisp line from the grazing rim.
-    lights["key"].data.energy = 7
-    lights["fill"].data.energy = 1.2
+    lights["key"].data.energy = 4
+    lights["fill"].data.energy = 0.8
     rim = lights["rim_r"]
-    rim.data.energy = 50
-    key(rim, "location", 925, (0.55, 0.9, -0.35))
-    key(rim, "location", 974, (0.55, -0.5, -0.35))
+    rx, ry0, ry1, rz, re = (float(v) for v in os.environ.get("MACRO_RIM", "0.9,0.35,-0.25,0.25,20").split(","))
+    rim.data.energy = re
+    key(rim, "location", 925, (rx, ry0, rz))
+    key(rim, "location", 974, (rx, ry1, rz))
+    for f in (925, 974):
+        bpy.context.scene.frame_set(f)
+        look_at(rim, (0, 0, 0))
+        rim.keyframe_insert("rotation_euler", frame=f)
     return [cam, rig, rim]
 
 
@@ -647,7 +654,7 @@ def anim_end(rig, cam, lights, focus):
     cam.data.dof.focus_object = focus
     d = 0.80
     ppm = frame_px_per_m(d)
-    cam.location = (-400 / ppm, 0.0, d)
+    cam.location = (-320 / ppm, 0.0, d)
     cam.rotation_euler = (0, 0, 0)
     # Hero turn: 3/4 back (module catching the rim light) to the front, landing on b62 (f1550).
     key(rig, "rotation_euler", 1440, deg(6, 152, -3))
