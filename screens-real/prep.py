@@ -31,7 +31,7 @@ def segment_filter(i, seg):
     """One edit-list entry: [file, in_s, out_s, speed] or ["hold", seconds] (repeats the previous frame)."""
     src, t0, t1, speed = seg
     pts = f"(PTS-STARTPTS)/{speed}"
-    return f"[{i}:v]trim={t0}:{t1},setpts={pts},fps=30,scale={W}:{H},setsar=1,format=yuv420p[s{i}]"
+    return f"[{i}:v]fps=30,trim={t0}:{t1},setpts={pts},fps=30,scale={W}:{H},setsar=1,format=yuv420p[s{i}]"
 
 
 def clips(names):

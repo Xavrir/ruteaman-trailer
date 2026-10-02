@@ -18,7 +18,7 @@ import time
 import bmesh
 import bpy
 from bpy_extras.object_utils import world_to_camera_view
-from mathutils import Matrix, Vector
+from mathutils import Euler, Matrix, Vector
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MM = 0.001
@@ -474,13 +474,21 @@ def deg(*a):
 
 
 SHOTS = {
-    # 0 to 6.83 s. Emerges from darkness at 3/4, turns ~15 deg toward camera, then pushes into the dot.
-    "hook": dict(video="screen-a", video_start=0, video_frames=205, frames=(0, 204), still=110, fstop=2.8),
+    # 0 to 6.83 s. Emerges from darkness at 3/4, turns ~15 deg toward camera, then pushes into the puck.
+    "hook": dict(video="hook", video_start=0, video_frames=205, frames=(0, 204), still=110, fstop=2.8),
+    # 17.5 to 30.83 s. Turns into a 3/4 hero angle while the real search and route options play, then a slow
+    # push toward the option rows as the alternative is tapped (f825, b33).
+    "route": dict(video="route", video_start=525, video_frames=450, frames=(525, 924), still=700, fstop=3.2),
+    # 30.83 to 32.5 s. Macro of the right frame edge and the cover glass catching the rim light.
+    "macro": dict(video="route", video_start=525, video_frames=450, frames=(925, 974), still=950, fstop=2.8, lens=100),
     # 36.33 to 41.67 s. Floats on the right with a gentle tilt, slow 10 deg orbit.
     "protect": dict(video="screen-b", video_start=1090, video_frames=165, frames=(1090, 1252), still=1170, fstop=3.2),
     # 48.0 to 54.17 s. Hero turn from a 3/4 back view to the front, settles at b62 (f1550), then holds.
-    "end": dict(video="screen-c", video_start=1430, video_frames=195, frames=(1440, 1552), still=1530, fstop=3.2),
+    "end": dict(video="end", video_start=1440, video_frames=186, frames=(1440, 1625), still=1550, fstop=3.2),
 }
+
+# The hook pushes into the location puck of the real recording (texture px).
+PUCK = (540, 780)
 
 
 def frame_px_per_m(d, lens=85):
@@ -506,7 +514,7 @@ def setup_lights(shot, phone_parts, glass):
     )
     for name, ob in lights.items():
         ob.light_linking.receiver_collection = face if name == "sweep" else body
-    if shot == "protect":
+    if shot in ("protect", "route"):
         lights["sweep"].location = (-0.95, 0.3, 0.55)
     elif shot == "end":
         # Reflects as the phone passes yaw +13 deg, just before it settles at -14 deg, then leaves the glass clear.
@@ -524,14 +532,13 @@ def anim_hook(rig, cam, lights, glass_bsdf, focus):
     cam.rotation_euler = (0, 0, 0)
     key(cam, "location", 0, (-400 / ppm0, 0.004, d0))
     key(cam, "location", 164, (-400 / ppm0, 0.0, d0))
-    # Handoff at b8: the push lands at f194 and holds. The dot (tex 540,1702) sits on frame (1360,726) at
-    # 0.97 frame px per tex px = 1.116 frame px per map px, so the world map in index.html opens at 1.15x
-    # with its bottom edge just below the frame.
-    dot = tex_to_local(540, 1702)
-    ppm1 = 0.97 / (AW / TEX_W)
+    # Handoff at b8: the push lands at f194 with the puck on frame (1080, 700) at 2 frame px per screen px, so the
+    # screen covers the whole frame and index.html can dissolve into the flat map without a bezel in view.
+    dot = tex_to_local(*PUCK)
+    ppm1 = 2.0 / (AW / TEX_W)
     d1 = 1920 * 0.085 / (0.036 * ppm1)
-    key(cam, "location", 194, (dot.x - 400 / ppm1, dot.y + 186 / ppm1, ZG + d1))
-    key(cam, "location", 204, (dot.x - 400 / ppm1, dot.y + 186 / ppm1, ZG + d1))
+    key(cam, "location", 194, (dot.x - 120 / ppm1, dot.y + 160 / ppm1, ZG + d1))
+    key(cam, "location", 204, (dot.x - 120 / ppm1, dot.y + 160 / ppm1, ZG + d1))
     # Phone: 3/4 yaw easing toward camera (about 15 deg over the shot), slight pitch, square at the push.
     key(rig, "rotation_euler", 0, deg(6, -28, 2))
     key(rig, "rotation_euler", 164, deg(2, -13, 0.5))
@@ -573,6 +580,69 @@ def anim_protect(rig, cam, lights, focus):
     return [cam, rig]
 
 
+def place_camera(cam, frame, point, frame_xy, dist):
+    """Key an unrotated camera so that a world point lands on frame_xy at the given depth."""
+    ppm = frame_px_per_m(dist, cam.data.lens)
+    x = point.x - (frame_xy[0] - 960) / ppm
+    y = point.y + (frame_xy[1] - 540) / ppm
+    key(cam, "location", frame, (x, y, point.z + dist))
+
+
+def rig_point(rig, rot, loc, local):
+    m = Matrix.Translation(loc) @ Euler(rot).to_matrix().to_4x4()
+    return m @ local
+
+
+def anim_route(rig, cam, lights, focus):
+    """Hero turn while search and route options play, a slow drift, then a push into the option rows."""
+    cam.data.dof.focus_object = focus
+    cam.rotation_euler = (0, 0, 0)
+    d = 0.80
+    ppm = frame_px_per_m(d)
+    # Enters low and edge-on from the black brand shot, turns to 3/4 and settles on b24 (f600).
+    key(rig, "rotation_euler", 525, deg(14, -78, -6))
+    key(rig, "rotation_euler", 600, deg(4, -24, -1.5))
+    key(rig, "rotation_euler", 800, deg(3, -19, -1))
+    key(rig, "location", 525, (0.018, -0.105, -0.06))
+    key(rig, "location", 600, (0, 0, 0))
+    key(rig, "location", 800, (0, 0.003, 0))
+    key(cam, "location", 525, (-380 / ppm, 0.0, d))
+    key(cam, "location", 600, (-380 / ppm, 0.0, d))
+    key(cam, "location", 800, (-380 / ppm, 0.0, d - 0.025))
+    # Push: the option rows (texture y ~1950) move toward frame centre-right as the alternative is tapped.
+    rot_end, loc_end = deg(1.5, -12, -0.5), Vector((0, 0.003, 0))
+    key(rig, "rotation_euler", 924, rot_end)
+    key(rig, "location", 924, loc_end)
+    target = rig_point(rig, rot_end, loc_end, tex_to_local(560, 1880))
+    place_camera(cam, 924, target, (1250, 560), 0.40)
+    focus.location = tex_to_local(560, 1700)
+    return [cam, rig]
+
+
+def anim_macro(rig, cam, lights, focus):
+    """Extreme close-up: the end of the ribbon on the cover glass and the right frame edge, a rim highlight
+    running down the chamfer."""
+    cam.data.dof.focus_object = focus
+    cam.rotation_euler = (0, 0, 0)
+    rot0, rot1 = deg(6, -34, 0), deg(5, -30, 0)
+    key(rig, "rotation_euler", 925, rot0)
+    key(rig, "rotation_euler", 974, rot1)
+    key(rig, "location", 925, (0, 0, 0))
+    key(rig, "location", 974, (0, 0, 0))
+    spot = tex_to_local(900, 700)
+    place_camera(cam, 925, rig_point(rig, rot0, Vector((0, 0, 0)), spot + Vector((0, 4 * MM, 0))), (820, 560), 0.21)
+    place_camera(cam, 974, rig_point(rig, rot1, Vector((0, 0, 0)), spot + Vector((0, -3 * MM, 0))), (820, 560), 0.19)
+    focus.location = spot
+    # Low key so the side face goes dark and the chamfer reads as one crisp line from the grazing rim.
+    lights["key"].data.energy = 7
+    lights["fill"].data.energy = 1.2
+    rim = lights["rim_r"]
+    rim.data.energy = 50
+    key(rim, "location", 925, (0.55, 0.9, -0.35))
+    key(rim, "location", 974, (0.55, -0.5, -0.35))
+    return [cam, rig, rim]
+
+
 def anim_end(rig, cam, lights, focus):
     cam.data.dof.focus_object = focus
     d = 0.80
@@ -582,10 +652,10 @@ def anim_end(rig, cam, lights, focus):
     # Hero turn: 3/4 back (module catching the rim light) to the front, landing on b62 (f1550).
     key(rig, "rotation_euler", 1440, deg(6, 152, -3))
     key(rig, "rotation_euler", 1550, deg(0, -14, 0))
-    key(rig, "rotation_euler", 1552, deg(0, -14, 0))
+    key(rig, "rotation_euler", 1625, deg(0, -14, 0))
     key(rig, "location", 1440, (0, -0.016, -0.02))
     key(rig, "location", 1550, (0, 0, 0))
-    key(rig, "location", 1552, (0, 0, 0))
+    key(rig, "location", 1625, (0, 0, 0))
     return [rig]
 
 
@@ -596,7 +666,8 @@ def align_table(cam, rig, frames):
     for f in range(frames[0], frames[1] + 1):
         sc.frame_set(f)
         mw = rig.matrix_world
-        pts = [mw @ tex_to_local(540, 1702), mw @ tex_to_local(640, 1702), mw @ tex_to_local(540, 1802)]
+        px0, py0 = PUCK
+        pts = [mw @ tex_to_local(px0, py0), mw @ tex_to_local(px0 + 100, py0), mw @ tex_to_local(px0, py0 + 100)]
         px = []
         for p in pts:
             v = world_to_camera_view(sc, cam, p)
@@ -631,23 +702,27 @@ def main():
     video = os.path.join(ROOT, "blender", "render", "screens", cfg["video"])
     mat, bsdf = screen_material(video, cfg["video_start"], cfg["video_frames"])
     glass.data.materials[0] = mat
-    cam = make_camera()
+    cam = make_camera(cfg.get("lens", 85))
     cam.data.dof.aperture_fstop = cfg["fstop"]
     lights = setup_lights(a.shot, parts, glass)
     focus = bpy.data.objects.new("Focus", None)
     sc.collection.objects.link(focus)
     focus.parent = rig
-    focus.location = tex_to_local(540, 1702) if a.shot == "hook" else (0, 0, ZG)
+    focus.location = tex_to_local(*PUCK) if a.shot == "hook" else (0, 0, ZG)
 
     if a.shot == "hook":
         animated = anim_hook(rig, cam, lights, bsdf, focus)
         animated.append(mat.node_tree)
+    elif a.shot == "route":
+        animated = anim_route(rig, cam, lights, focus)
+    elif a.shot == "macro":
+        animated = anim_macro(rig, cam, lights, focus)
     elif a.shot == "protect":
         animated = anim_protect(rig, cam, lights, focus)
     else:
         animated = anim_end(rig, cam, lights, focus)
     for idd in animated:
-        shape_curves(idd, 0.36 if a.shot == "protect" else 0.6)
+        shape_curves(idd, 0.36 if a.shot in ("protect", "macro") else 0.6)
     sc.frame_start, sc.frame_end = cfg["frames"]
 
     if a.save_blend:

@@ -2,7 +2,7 @@
   "hook": {
     "film_start": 0,
     "frames": 205,
-    "segments": [["s1-explore-t3.mp4", 1.97, 9.0, 1.0]]
+    "segments": [["s1-explore-t3.mp4", 0.97, 8.0, 1.0]]
   },
   "route": {
     "film_start": 525,
@@ -12,7 +12,7 @@
       ["s23-route-t6.mp4", 10.78, 12.92, 1.0],
       ["s23-route-t6.mp4", 12.92, 19.78, 2.0],
       ["s23-route-t6.mp4", 19.78, 20.78, 1.0],
-      ["s23-route-t6.mp4", 20.78, 24.78, 2.0],
+      ["s23-route-t6.mp4", 21.98, 24.78, 2.0],
       ["s23-route-t6.mp4", 24.78, 27.78, 1.0]
     ]
   },

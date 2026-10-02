@@ -14,35 +14,34 @@
       @font-face { font-family: "Inter Display"; src: url("assets/fonts/InterDisplay-Bold.ttf") format("truetype"); font-weight: 700; }
 
       :root {
-        --black: #000000;
-        --g1: #111113;
-        --g2: #1c1c1e;
-        --g3: #2c2c2e;
+        --base: #0b0f16;
+        --g1: #12161e;
+        --hair: #262b35;
         --label: #ffffff;
-        --label2: #aeaeb2;
-        --label3: #8e8e93;
+        --label2: #aeb3bd;
+        --label3: #858b96;
         --mint: #00e6b0;
         --amber: #ff9f0a;
         --sos: #d70015;
       }
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--base); }
       #root {
-        position: relative; width: 100%; height: 100%; overflow: hidden; background: #000;
+        position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--base);
         font-family: "Inter", sans-serif; color: var(--label);
         -webkit-font-smoothing: antialiased;
       }
       .clip { position: absolute; inset: 0; }
-      .layer { position: absolute; inset: 0; }
-      .display { font-family: "Inter Display", sans-serif; font-weight: 700; letter-spacing: -0.025em; }
       .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 
       .headline {
-        position: absolute; left: 120px; top: 150px; width: 760px;
+        position: absolute; left: 120px; top: 150px; width: 800px;
         font-family: "Inter Display", sans-serif; font-weight: 700;
         font-size: 84px; line-height: 1.06; letter-spacing: -0.025em;
       }
-      .headline .line { display: block; }
+      /* Each line rises out of its own mask. The padding keeps descenders inside the mask. */
+      .line { display: block; overflow: hidden; padding-bottom: 0.14em; margin-bottom: -0.14em; }
+      .line > .in { display: block; }
       .body { font-size: 44px; line-height: 1.3; font-weight: 500; color: var(--label2); }
 
       /* shared world: map + route overlay, moved as one camera */
@@ -53,20 +52,14 @@
         -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 320px);
         mask-image: linear-gradient(90deg, transparent 0, #000 320px);
       }
-      /* Same crop with the hospital label unblurred: it matches the phone screen at the b8 handoff, then
-         fades to the blurred map before the headline needs a quiet column. */
-      #map-sharp {
-        position: absolute; left: 188px; top: -32px; width: 2095px; height: 1145px;
-        filter: grayscale(0.85) brightness(0.5) contrast(1.05);
-        -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 320px);
-        mask-image: linear-gradient(90deg, transparent 0, #000 320px);
-      }
+      /* Gives the grey map the night base's blue-black hue without changing its values. */
+      #map-tint { position: absolute; inset: 0; background: #0b1220; mix-blend-mode: color; opacity: 0.6; }
       #routes { position: absolute; left: 188px; top: -32px; width: 2095px; height: 1145px; overflow: visible; }
       #scrim {
         position: absolute; inset: 0; opacity: 0;
         background:
-          linear-gradient(90deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.94) 40%, rgba(0,0,0,0) 54%),
-          linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 80%, rgba(0,0,0,0.6) 100%);
+          linear-gradient(90deg, rgba(11,15,22,0.97) 0%, rgba(11,15,22,0.94) 40%, rgba(11,15,22,0) 54%),
+          linear-gradient(180deg, rgba(11,15,22,0.55) 0%, rgba(11,15,22,0) 22%, rgba(11,15,22,0) 80%, rgba(11,15,22,0.6) 100%);
       }
 
       /* hook */
@@ -75,45 +68,32 @@
         background: url("assets/img/map-hook.jpg") center / cover;
         filter: grayscale(1) brightness(0.22) blur(6px);
       }
-      #hook-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 55%, rgba(0,0,0,0.55) 100%); }
+      #hook-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(11,15,22,0.88) 0%, rgba(11,15,22,0.45) 55%, rgba(11,15,22,0.6) 100%); }
       .phone3d { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
 
       /* pills */
       .pill {
         position: absolute; height: 64px; padding: 0 26px; border-radius: 32px;
         display: flex; align-items: center; gap: 14px; white-space: nowrap;
-        background: #111113; border: 1.5px solid #2c2c2e; font-size: 40px; font-weight: 500; color: #fff;
+        background: var(--g1); border: 1.5px solid var(--hair); font-size: 40px; font-weight: 500; color: #fff;
       }
       .pill .sw { width: 16px; height: 16px; border-radius: 50%; flex: none; }
 
-      /* factors */
-      #factors { position: absolute; left: 120px; top: 360px; width: 760px; display: flex; flex-direction: column; gap: 30px; }
-      .factor { display: flex; align-items: center; gap: 28px; }
-      .factor .tile {
-        width: 84px; height: 84px; border-radius: 22px; flex: none; display: grid; place-items: center;
-        background: #161618; border: 1.5px solid #2c2c2e;
-      }
-      .factor .tile svg { width: 44px; height: 44px; fill: none; stroke: #fff; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-      .factor .label { font-size: 48px; font-weight: 500; }
-
-      /* route cards */
-      #cards { position: absolute; left: 120px; top: 0; height: 1080px; width: 700px; display: flex; flex-direction: column; justify-content: center; gap: 28px; }
-      .card { width: 700px; border-radius: 36px; background: #111113; border: 2px solid #2c2c2e; padding: 34px 40px 36px; }
-      .card.safe { border-color: rgba(0,230,176,0.75); }
-      .card .title { font-family: "Inter Display", sans-serif; font-weight: 600; font-size: 54px; letter-spacing: -0.02em; }
-      .card .stats { display: flex; gap: 0; margin-top: 18px; }
-      .card .stat { width: 200px; }
-      .card .stat .v { display: block; font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 88px; line-height: 1; letter-spacing: -0.02em; }
-      .card .stat .u { display: block; margin-top: 8px; font-size: 40px; font-weight: 500; color: var(--label2); }
-      .card .reason { margin-top: 24px; padding-top: 22px; border-top: 1.5px solid #2c2c2e; font-size: 40px; font-weight: 500; color: var(--label2); }
+      /* four signals: plain type on hairlines, beside the phone */
+      #signals { position: absolute; left: 120px; top: 492px; width: 700px; }
+      .sig { position: relative; display: flex; align-items: baseline; gap: 30px; padding: 22px 0 20px; }
+      .sig .rule { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--hair); transform-origin: 0 50%; }
+      .sig .ix { width: 40px; flex: none; font-size: 30px; font-weight: 500; color: var(--label3); }
+      .sig .line { flex: 1; }
+      .sig .tx { font-size: 46px; font-weight: 500; letter-spacing: -0.01em; }
 
       /* payoff */
       #payoff { position: absolute; left: 0; right: 0; top: 0; height: 1080px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-      #payoff .l1, #payoff .l2 { font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 120px; line-height: 1.08; letter-spacing: -0.03em; }
+      #payoff .big { font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 120px; line-height: 1.08; letter-spacing: -0.03em; }
       #payoff .sub { margin-top: 36px; font-size: 44px; font-weight: 500; color: var(--label3); }
 
       /* sos */
-      #sos { background: #000; }
+      #sos { background: var(--base); }
       #sos-btn {
         position: absolute; left: 820px; top: 290px; width: 280px; height: 280px; border-radius: 50%;
         background: var(--sos); display: grid; place-items: center;
@@ -127,7 +107,6 @@
       #lockup .mark { width: 96px; height: 96px; background: url("assets/img/logo.png") center / contain no-repeat; }
       #lockup .wm { font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 64px; letter-spacing: -0.02em; }
       #tagline { position: absolute; left: 120px; top: 410px; width: 900px; font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 104px; line-height: 1.04; letter-spacing: -0.03em; }
-      #tagline .line { display: block; }
       #subline { position: absolute; left: 120px; top: 660px; width: 860px; font-size: 46px; font-weight: 500; color: var(--label2); }
       #footer { position: absolute; left: 120px; top: 930px; font-size: 36px; font-weight: 500; color: var(--label3); }
 
@@ -143,23 +122,21 @@
 
       <div id="world">
         <img id="map" src="assets/img/map-wide.jpg" alt="" />
-        <img id="map-sharp" src="assets/img/map-wide-sharp.jpg" alt="" />
+        <div id="map-tint"></div>
       </div>
       <div id="scrim"></div>
       <div id="rworld">
         <svg id="routes" viewBox="0 0 2160 1180">
           <defs>
             <radialGradient id="quiet-grad">
-              <stop offset="0" stop-color="#000" stop-opacity="0.9" />
-              <stop offset="0.6" stop-color="#000" stop-opacity="0.72" />
-              <stop offset="1" stop-color="#000" stop-opacity="0" />
+              <stop offset="0" stop-color="#0b0f16" stop-opacity="0.9" />
+              <stop offset="0.6" stop-color="#0b0f16" stop-opacity="0.72" />
+              <stop offset="1" stop-color="#0b0f16" stop-opacity="0" />
             </radialGradient>
             <mask id="m-safe" maskUnits="userSpaceOnUse" x="0" y="0" width="2160" height="1180"><path id="m-safe-path" fill="none" stroke="#fff" stroke-width="70" stroke-linecap="round" stroke-linejoin="round" /></mask>
-            <mask id="m-fast" maskUnits="userSpaceOnUse" x="0" y="0" width="2160" height="1180"><path id="m-fast-path" fill="none" stroke="#fff" stroke-width="70" stroke-linecap="round" stroke-linejoin="round" /></mask>
           </defs>
           <circle id="quiet" cx="1150" cy="600" r="420" fill="url(#quiet-grad)" opacity="0" />
           <path id="plain-fast" fill="none" stroke="#f2f2f7" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
-          <g id="rib-fast" mask="url(#m-fast)" opacity="0"></g>
           <g id="rib-safe" mask="url(#m-safe)"></g>
           <path id="traveled" fill="none" stroke="#000" stroke-opacity="0.6" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" />
           <g id="dest">
@@ -181,67 +158,65 @@
         <div id="hook-bg"></div>
         <div id="hook-shade"></div>
         <div class="headline" id="hook-text" style="top: 380px; width: 900px">
-          <span class="line" id="hook-l1">Pulang malam?</span>
-          <span class="line" id="hook-l2">Jalan mana yang aman?</span>
+          <span class="line" id="hook-l1"><span class="in">Pulang malam?</span></span>
+          <span class="line" id="hook-l2"><span class="in">Jalan mana yang aman?</span></span>
         </div>
       </section>
 
       <section id="problem" class="clip" data-start="6.6667" data-duration="6.6667" data-track-index="2">
         <div class="headline" id="prob-text">
-          <span class="line" id="prob-l1">Aplikasi peta memilih yang tercepat.</span>
-          <span class="line" id="prob-l2" style="margin-top: 28px">Bukan yang teraman.</span>
+          <div id="prob-a">
+            <span class="line"><span class="in">Aplikasi peta</span></span>
+            <span class="line"><span class="in">memilih yang</span></span>
+            <span class="line"><span class="in">tercepat.</span></span>
+          </div>
+          <div id="prob-b" style="margin-top: 28px">
+            <span class="line"><span class="in">Bukan yang</span></span>
+            <span class="line"><span class="in">teraman.</span></span>
+          </div>
         </div>
         <div class="pill" id="pill-quiet" style="left: 1236px; top: 618px"><span class="sw" style="background: #48484a"></span>Jalan sepi, minim lampu</div>
         <div class="pill" id="pill-time" style="left: 1474px; top: 150px"><span class="num">13 mnt</span></div>
       </section>
 
-      <section id="how" class="clip" data-start="17.5" data-duration="9.8333" data-track-index="2">
-        <div class="headline" id="how-a">Setiap ruas jalan dinilai risikonya.</div>
-        <div class="headline" id="how-b">Dari empat sinyal.</div>
-        <div class="pill" id="pill-amber" style="left: 1290px; top: 474px"><span class="sw" style="background: var(--amber)"></span>Waspada</div>
-        <div class="pill" id="pill-unknown" style="left: 1410px; top: 320px"><span class="sw" style="background: #8e8e93"></span>Data kurang</div>
-        <div id="factors">
-          <div class="factor" id="f1"><div class="tile"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v10.5H10l-4.5 3.5V16H4z" /><path d="M12 8.2v3.6" /><path d="M12 13.9v.01" /></svg></div><div class="label">Laporan warga</div></div>
-          <div class="factor" id="f2"><div class="tile"><svg viewBox="0 0 24 24"><path d="M19.5 14.6A7.8 7.8 0 1 1 9.4 4.5a6.2 6.2 0 0 0 10.1 10.1z" /></svg></div><div class="label">Jalan gelap</div></div>
-          <div class="factor" id="f3"><div class="tile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg></div><div class="label">Sepi &amp; jam rawan</div></div>
-          <div class="factor" id="f4"><div class="tile"><svg viewBox="0 0 24 24"><path d="M12 21s-6.8-6-6.8-11A6.8 6.8 0 0 1 18.8 10c0 5-6.8 11-6.8 11z" /><path d="M12 7v6M9 10h6" /></svg></div><div class="label">Jarak ke bantuan</div></div>
+      <section id="route" class="clip" data-start="17.5" data-duration="13.3333" data-track-index="2">
+        <div class="headline" id="rt-text">
+          <div id="rt-a">
+            <span class="line"><span class="in">Setiap ruas jalan</span></span>
+            <span class="line"><span class="in">dinilai risikonya.</span></span>
+          </div>
+          <div id="rt-b" style="margin-top: 28px">
+            <span class="line"><span class="in">Dari empat sinyal.</span></span>
+          </div>
         </div>
+        <div id="signals">
+          <div class="sig"><div class="rule"></div><span class="ix num">01</span><span class="line"><span class="in tx">Laporan warga</span></span></div>
+          <div class="sig"><div class="rule"></div><span class="ix num">02</span><span class="line"><span class="in tx">Jalan gelap</span></span></div>
+          <div class="sig"><div class="rule"></div><span class="ix num">03</span><span class="line"><span class="in tx">Sepi &amp; jam rawan</span></span></div>
+          <div class="sig"><div class="rule"></div><span class="ix num">04</span><span class="line"><span class="in tx">Jarak ke bantuan</span></span></div>
+        </div>
+        <div class="headline" id="ch-text">
+          <span class="line"><span class="in">Pilih rute yang</span></span>
+          <span class="line"><span class="in">lebih aman.</span></span>
+        </div>
+        <div class="body" id="ch-sub" style="position: absolute; left: 120px; top: 380px; width: 640px">Risiko tiap rute terlihat sebelum berangkat.</div>
       </section>
 
-      <section id="choice" class="clip" data-start="26.6667" data-duration="10" data-track-index="2">
-        <div id="cards">
-          <div class="card safe" id="card-safe">
-            <div class="title">Rute Aman</div>
-            <div class="stats">
-              <div class="stat"><span class="v num mint" id="n-safe-risk">22</span><span class="u">Risiko</span></div>
-              <div class="stat"><span class="v num" id="n-safe-km">1,4</span><span class="u">km</span></div>
-              <div class="stat"><span class="v num" id="n-safe-min">18</span><span class="u">mnt</span></div>
-            </div>
-            <div class="reason">Lewat jalan terang dan ramai.</div>
-          </div>
-          <div class="card" id="card-fast">
-            <div class="title">Rute Tercepat</div>
-            <div class="stats">
-              <div class="stat"><span class="v num" id="n-fast-risk">68</span><span class="u">Risiko</span></div>
-              <div class="stat"><span class="v num" id="n-fast-km">1,1</span><span class="u">km</span></div>
-              <div class="stat"><span class="v num" id="n-fast-min">13</span><span class="u">mnt</span></div>
-            </div>
-          </div>
-        </div>
+      <section id="choice" class="clip" data-start="32.5" data-duration="4.1667" data-track-index="2">
         <div id="payoff">
-          <div class="l1">+5 menit,</div>
-          <div class="l2">risiko turun <span class="mint num" id="n-pay">67,6%</span></div>
-          <div class="sub">Selisih 0,3 km · skenario prototipe</div>
+          <div class="big"><span class="line" id="pay-l1"><span class="in">+5 menit,</span></span></div>
+          <div class="big"><span class="line" id="pay-l2"><span class="in">risiko turun <span class="mint num" id="n-pay">67,6%</span></span></span></div>
+          <div class="sub" id="pay-sub">Selisih 0,3 km · skenario prototipe</div>
         </div>
       </section>
 
       <section id="protect" class="clip" data-start="36.5" data-duration="5.1667" data-track-index="2">
-        <div class="headline" id="prot-title">Pelindung aktif</div>
+        <div class="headline" id="prot-title"><span class="line"><span class="in">Pelindung aktif</span></span></div>
         <div class="body" id="prot-sub" style="position: absolute; left: 120px; top: 262px; width: 680px">Lokasimu dibagikan langsung ke orang rumah.</div>
       </section>
 
       <section id="arrive" class="clip" data-start="45" data-duration="4" data-track-index="2">
-        <div class="headline" id="arr-title">Sudah sampai.</div>
+        <div class="headline" id="arr-title"><span class="line"><span class="in">Sudah sampai.</span></span></div>
         <div class="body" id="arr-sub" style="position: absolute; left: 120px; top: 262px; width: 680px">Orang rumah sudah dikabari.</div>
       </section>
 
@@ -263,7 +238,7 @@
           </svg>
           <img id="logo-png" src="assets/img/logo.png" alt="" />
         </div>
-        <div id="brand-wm">Rute<span class="mint">Aman</span></div>
+        <div id="brand-wm"><span class="line"><span class="in">Rute<span class="mint">Aman</span></span></span></div>
       </section>
 
       <section id="sos" class="clip" data-start="41.6667" data-duration="3.3333" data-track-index="3">
@@ -275,13 +250,15 @@
 
       <section id="end" class="clip" data-start="48.3333" data-duration="5.8333" data-track-index="3">
         <div id="lockup"><div class="mark"></div><div class="wm">Rute<span class="mint">Aman</span></div></div>
-        <div id="tagline"><span class="line">Pulang malam,</span><span class="line">tetap tenang.</span></div>
+        <div id="tagline"><span class="line"><span class="in">Pulang malam,</span></span><span class="line"><span class="in">tetap tenang.</span></span></div>
         <div id="subline">Rute terang, kabar untuk orang rumah.</div>
         <div id="footer">GEMASTIK 2026 · Universitas Bina Nusantara</div>
       </section>
 
-      <!-- 3D phone renders (blender/phone.py), VP9 with alpha, timed on film frames -->
+      <!-- 3D phone renders (blender/phone.py) with the real app recordings on screen, VP9 with alpha, timed on film frames -->
       <video id="v-hook" class="clip phone3d" src="assets/3d/phone-hook.webm" muted playsinline data-layout-allow-occlusion data-start="0" data-duration="6.8333" data-track-index="4"></video>
+      <video id="v-route" class="clip phone3d" src="assets/3d/phone-route.webm" muted playsinline data-layout-allow-occlusion data-start="17.5" data-duration="13.3333" data-track-index="4"></video>
+      <video id="v-macro" class="clip phone3d" src="assets/3d/phone-macro.webm" muted playsinline data-layout-allow-occlusion data-start="30.8333" data-duration="1.6667" data-track-index="4"></video>
       <video id="v-protect" class="clip phone3d" src="assets/3d/phone-protect.webm" muted playsinline data-layout-allow-occlusion data-start="36.3333" data-duration="5.3333" data-track-index="4"></video>
       <video id="v-end" class="clip phone3d" src="assets/3d/phone-end.webm" muted playsinline data-layout-allow-occlusion data-start="48" data-duration="6.1667" data-track-index="4"></video>
     </div>
@@ -290,12 +267,12 @@
       const FPS = 30;
       const f = (n) => n / FPS;
       const OUT = "power3.out";
-      const MOVE = "power4.inOut";
       const NS = "http://www.w3.org/2000/svg";
 
       const MINT = "#00e6b0";
       const AMBER = "#ff9f0a";
       const UNKNOWN = "#8e8e93";
+      const DIM = "#5c626d";
 
       // Points are in map-wide.jpg pixels (2160x1180); they trace real streets of the crop.
       const START = [735, 860];
@@ -306,10 +283,7 @@
         [[1550, 518], MINT], [[1612, 523], MINT], [[1612, 440], UNKNOWN], [[1612, 352], MINT],
         [[1612, 305], MINT], [DEST, null],
       ];
-      const FAST = [
-        [START, MINT], [[860, 852], AMBER], [[990, 850], AMBER], [[990, 700], UNKNOWN], [[990, 560], AMBER],
-        [[990, 415], AMBER], [[1350, 415], AMBER], [[1350, 305], AMBER], [DEST, null],
-      ];
+      const FAST = [START, [860, 852], [990, 850], [990, 700], [990, 560], [990, 415], [1350, 415], [1350, 305], DEST];
 
       function roundedPath(pts, r = 26) {
         let d = `M${pts[0][0]},${pts[0][1]}`;
@@ -356,10 +330,9 @@
       }
 
       const safe = buildRibbon(SAFE, document.getElementById("rib-safe"), document.getElementById("m-safe-path"));
-      const fast = buildRibbon(FAST, document.getElementById("rib-fast"), document.getElementById("m-fast-path"));
 
       const plain = document.getElementById("plain-fast");
-      plain.setAttribute("d", roundedPath(FAST.map((p) => p[0])));
+      plain.setAttribute("d", roundedPath(FAST));
       const plainLen = plain.getTotalLength();
       plain.style.strokeDasharray = `${plainLen} ${plainLen}`;
       plain.style.strokeDashoffset = `${plainLen}`;
@@ -397,48 +370,52 @@
         node.textContent = fmt(0, dp) + suffix;
         tl.to(o, { v: to, duration: dur, ease: "power2.out", onUpdate: () => { node.textContent = fmt(o.v, dp) + suffix; } }, at);
       }
+      const nodes = (target) => (typeof target === "string" ? [...document.querySelectorAll(target)] : [].concat(target));
+      const inner = (target) => nodes(target).flatMap((n) => (n.classList.contains("line") ? [n.querySelector(":scope > .in")] : [...n.querySelectorAll(".line > .in")]));
+      // Lines rise out of their masks one after another, two frames apart, so a block reads top to bottom.
+      const reveal = (tl, sel, at, dur = 0.85, stagger = f(4)) =>
+        tl.fromTo(inner(sel), { yPercent: 112 }, { yPercent: 0, duration: dur, ease: "power4.out", stagger, immediateRender: true }, at);
       const rise = (tl, target, at, dur = 0.9, dy = 28) =>
         tl.fromTo(target, { opacity: 0, y: dy }, { opacity: 1, y: 0, duration: dur, ease: OUT }, at);
-      const fadeOut = (tl, target, at, dur = 0.5) => tl.to(target, { opacity: 0, duration: dur, ease: "power2.in" }, at);
 
       const tl = gsap.timeline({ paused: true });
 
-      // Shot 1, hook (f0-200)
+      // Shot 1, hook (f0-200): the real explore screen; its sheet slides down (f125-160), then the camera pushes
+      // into the location puck and lands at f194 with the screen filling the frame.
       tl.fromTo("#hook-bg", { opacity: 0 }, { opacity: 1, duration: 1.2, ease: "power2.out" }, 0);
-      rise(tl, "#hook-l1", f(25));
-      rise(tl, "#hook-l2", f(100));
-      tl.to("#hook-l1", { color: "#6e6e73", duration: 0.6, ease: "power2.out" }, f(100));
-      tl.to("#hook-text", { opacity: 0, x: -30, duration: 0.5, ease: "power2.in" }, f(168));
-      // The 3D camera lands in the phone screen at f194. Its map is the world map, so the world fades in
-      // under the phone and the bezel dissolves away.
-      tl.fromTo("#v-hook", { opacity: 1 }, { opacity: 0, duration: f(8), ease: "none", immediateRender: false }, f(194));
-      tl.to("#hook-bg", { opacity: 0, duration: f(25), ease: "none" }, f(175));
-      tl.to("#hook-shade", { opacity: 0, duration: f(18), ease: "none" }, f(176));
-      tl.to("#map-sharp", { opacity: 0, duration: 1.0, ease: "power1.inOut" }, f(206));
+      reveal(tl, "#hook-l1", f(25));
+      reveal(tl, "#hook-l2", f(100));
+      tl.to("#hook-l1", { color: DIM, duration: 0.6, ease: "power2.out" }, f(100));
+      tl.to("#hook-text", { opacity: 0, x: -30, duration: 0.5, ease: "power2.in" }, f(160));
+      tl.to("#hook-bg", { opacity: 0, duration: f(25), ease: "none" }, f(170));
+      tl.to("#hook-shade", { opacity: 0, duration: f(18), ease: "none" }, f(172));
+      tl.fromTo("#v-hook", { opacity: 1 }, { opacity: 0, duration: f(10), ease: "none", immediateRender: false }, f(192));
 
-      // Shot 2, problem (f200-400): same map the whole middle act uses
+      // Shot 2, problem (f200-400). The flat map takes over from the phone's map at the puck, at the scale the
+      // screen shows it, then pulls out to the neighbourhood.
       tl.set("#world, #rworld", { transformOrigin: "960px 540px" }, 0);
-      tl.fromTo("#world, #rworld", { opacity: 0 }, { opacity: 1, duration: f(10), ease: "none" }, f(186));
-      // Frame-by-frame match to the 3D screen (blender/hook-align.json): [frame, dot x, dot y, frame px per
-      // screen px]. The screen shows map-wide at 1.15 screen px per map px; the map image sits at 0.9699.
-      const HANDOFF = [[184, 1359.36, 708.47, 0.67775], [185, 1359.46, 711.61, 0.73006], [186, 1359.56, 714.55, 0.77906], [187, 1359.66, 717.22, 0.82368], [188, 1359.75, 719.58, 0.86304], [189, 1359.82, 721.59, 0.89653], [190, 1359.89, 723.22, 0.92374], [191, 1359.94, 724.47, 0.94454], [192, 1359.97, 725.34, 0.95898], [193, 1359.99, 725.84, 0.96732], [194, 1360.0, 726.0, 0.97], [195, 1360.0, 726.0, 0.97], [196, 1360.0, 726.0, 0.97], [197, 1360.0, 726.0, 0.97], [198, 1360.0, 726.0, 0.97], [199, 1360.0, 726.0, 0.97], [200, 1360.0, 726.0, 0.97]];
+      tl.fromTo("#world, #rworld", { opacity: 0 }, { opacity: 1, duration: f(12), ease: "none" }, f(186));
+      // [frame, puck x, puck y, frame px per screen px] from blender/hook-align.json. One screen px of the
+      // recording covers 1/1.4 px of map-wide.jpg (measured on shared landmarks), which sits at K0 frame px per px.
+      const HANDOFF = [[184, 1246.92, 537.1, 0.95357], [185, 1225.35, 558.17, 1.08898], [186, 1202.61, 580.36, 1.23157], [187, 1179.4, 603.02, 1.37711], [188, 1156.56, 625.3, 1.52023], [189, 1135.11, 646.23, 1.65465], [190, 1116.1, 664.78, 1.77377], [191, 1100.51, 679.99, 1.87149], [192, 1089.08, 691.14, 1.94312], [193, 1082.23, 697.83, 1.98603], [194, 1080.0, 700.0, 2.0]];
       const K0 = 2095 / 2160;
+      const SCREEN_TO_MAP = 1.4;
       const startBase = [188 + START[0] * K0, -32 + START[1] * K0];
       const worldAt = ([, X, Y, m]) => {
-        const scale = (m * 1.15) / K0;
+        const scale = (m * SCREEN_TO_MAP) / K0;
         return { x: X - 960 - scale * (startBase[0] - 960), y: Y - 540 - scale * (startBase[1] - 540), scale };
       };
-      HANDOFF.forEach((row) => { if (row[0] < 200) tl.set("#world, #rworld", worldAt(row), f(row[0])); });
-      tl.fromTo("#world, #rworld", worldAt(HANDOFF[HANDOFF.length - 1]), { x: 0, y: 0, scale: 1, duration: 1.6, ease: OUT, immediateRender: false }, f(200));
-      tl.fromTo("#scrim", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power2.out" }, f(205));
-      tl.fromTo("#dest-dot", { opacity: 0, scale: 0.4, transformOrigin: "1400px 305px" }, { opacity: 1, scale: 1, duration: 0.7, ease: OUT }, f(225));
-      rise(tl, "#prob-l1", f(215));
+      HANDOFF.forEach((row) => tl.set("#world, #rworld", worldAt(row), f(row[0])));
+      tl.fromTo("#world, #rworld", worldAt(HANDOFF[HANDOFF.length - 1]), { x: 0, y: 0, scale: 1, duration: 1.9, ease: "power3.inOut", immediateRender: false }, f(196));
+      tl.fromTo("#scrim", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power2.out" }, f(212));
+      tl.fromTo("#dest-dot", { opacity: 0, scale: 0.4, transformOrigin: "1400px 305px" }, { opacity: 1, scale: 1, duration: 0.7, ease: OUT }, f(240));
+      reveal(tl, "#prob-a", f(225));
       tl.to(plain, { strokeDashoffset: 0, duration: 2, ease: "power2.inOut" }, f(250));
       tl.to("#quiet", { opacity: 1, duration: 1.2, ease: "power2.out" }, f(268));
       rise(tl, "#pill-quiet", f(275), 0.8, 16);
       rise(tl, "#pill-time", f(300), 0.8, 16);
-      rise(tl, "#prob-l2", f(325));
-      tl.to("#prob-l1", { color: "#6e6e73", duration: 0.6, ease: "power2.out" }, f(325));
+      reveal(tl, "#prob-b", f(325));
+      tl.to("#prob-a", { color: DIM, duration: 0.6, ease: "power2.out" }, f(325));
       tl.to(["#prob-text", "#pill-quiet", "#pill-time"], { opacity: 0, duration: 0.5, ease: "power2.in" }, f(383));
       tl.to("#world, #rworld", { opacity: 0, duration: 0.55, ease: "power2.in" }, f(383));
       tl.to("#scrim", { opacity: 0, duration: 0.55, ease: "power2.in" }, f(383));
@@ -452,49 +429,37 @@
       tl.to([strokes[2], strokes[3]], { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" }, f(430));
       tl.fromTo("#logo-png", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.inOut" }, f(450));
       tl.to("#logo-draw", { opacity: 0, duration: 0.3, ease: "none" }, f(462));
-      rise(tl, "#brand-wm", f(450), 1.0, 30);
+      reveal(tl, "#brand-wm", f(450), 1.0);
       tl.to(["#brand-logo", "#brand-wm"], { opacity: 0, scale: 0.97, duration: 0.6, ease: "power2.in" }, f(505));
 
-      // Shot 4, how it works (f525-800)
-      tl.to("#world, #rworld", { opacity: 1, duration: 0.8, ease: "power2.out" }, f(518));
-      tl.to("#scrim", { opacity: 1, duration: 0.8, ease: "power2.out" }, f(518));
-      rise(tl, "#how-a", f(535));
-      tl.to("#m-safe-path", { strokeDashoffset: 0, duration: 3.4, ease: "power1.inOut" }, f(550));
-      rise(tl, "#pill-amber", f(600), 0.7, 14);
-      rise(tl, "#pill-unknown", f(625), 0.7, 14);
-      tl.to(["#how-a", "#pill-amber", "#pill-unknown"], { opacity: 0, duration: 0.45, ease: "power2.in" }, f(660));
-      rise(tl, "#how-b", f(675));
-      ["#f1", "#f2", "#f3", "#f4"].forEach((id, i) => rise(tl, id, f(700 + i * 12), 0.8, 22));
+      // Shots 4 and 5, one 3D shot (f525-925): the phone turns in while the real search plays; the route ribbon
+      // draws on screen at b28 (f694-712), the four signals follow on eighth notes; the alternative is tapped at
+      // b33 (f825) as the camera pushes in, and Rute Aman is chosen again at f898.
+      tl.fromTo("#v-route", { opacity: 0 }, { opacity: 1, duration: f(12), ease: "power1.out" }, f(525));
+      reveal(tl, "#rt-a", f(700));
+      reveal(tl, "#rt-b", f(750));
+      tl.to("#rt-a", { color: DIM, duration: 0.6, ease: "power2.out" }, f(750));
+      document.querySelectorAll("#signals .sig").forEach((row, i) => {
+        const at = f(762 + i * 12.5);
+        tl.fromTo(row.querySelector(".rule"), { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power3.out" }, at);
+        tl.fromTo(row.querySelector(".ix"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, at + f(3));
+        reveal(tl, row.querySelector(".line"), at + f(2));
+      });
+      tl.to(["#rt-text", "#signals"], { opacity: 0, duration: 0.4, ease: "power2.in" }, f(836));
+      reveal(tl, "#ch-text", f(850));
+      rise(tl, "#ch-sub", f(866), 0.8, 20);
+      tl.to(["#ch-text", "#ch-sub"], { opacity: 0, duration: 0.35, ease: "power2.in" }, f(908));
 
-      // Shot 5, the choice (f800-1100)
-      tl.to(["#how-b", "#factors"], { opacity: 0, duration: 0.45, ease: "power2.in" }, f(803));
-      tl.set("#rib-fast", { opacity: 1 }, f(805));
-      tl.to("#m-fast-path", { strokeDashoffset: 0, duration: 1.6, ease: "power2.inOut" }, f(808));
-      tl.fromTo("#card-safe", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.9, ease: OUT }, f(825));
-      countUp(tl, "n-safe-risk", 22, 0, f(830));
-      countUp(tl, "n-safe-km", 1.4, 1, f(830));
-      countUp(tl, "n-safe-min", 18, 0, f(830));
-      tl.fromTo("#card-fast", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.9, ease: OUT }, f(850));
-      countUp(tl, "n-fast-risk", 68, 0, f(855));
-      countUp(tl, "n-fast-km", 1.1, 1, f(855));
-      countUp(tl, "n-fast-min", 13, 0, f(855));
-      tl.to("#cards", { opacity: 0, x: -30, duration: 0.6, ease: "power2.in" }, f(968));
-      tl.to("#world, #rworld", { opacity: 0.12, duration: 0.8, ease: "power2.inOut" }, f(965));
-      tl.to("#scrim", { opacity: 0, duration: 0.8, ease: "power2.inOut" }, f(965));
-      rise(tl, "#payoff .l1", f(975), 1.0, 30);
-      rise(tl, "#payoff .l2", f(985), 1.0, 30);
+      // Macro (f925-975), then the payoff on b39: the claim to remember, held 3.8 s.
+      reveal(tl, "#pay-l1", f(975), 1.0);
+      reveal(tl, "#pay-l2", f(985), 1.0);
       countUp(tl, "n-pay", 67.6, 1, f(990), 1.3, "%");
-      rise(tl, "#payoff .sub", f(1010), 0.9, 18);
+      rise(tl, "#pay-sub", f(1010), 0.9, 18);
       tl.to("#payoff", { opacity: 0, duration: 0.5, ease: "power2.in" }, f(1088));
 
       // Shot 6, protection (f1100-1350): live sharing, then SOS
-      tl.to("#rib-fast", { opacity: 0, duration: 0.6, ease: "power2.inOut" }, f(1090));
-      tl.to("#world, #rworld", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, f(1090));
       tl.fromTo("#v-protect", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, f(1100));
-      tl.set("#start-dot", { opacity: 0 }, f(1118));
-      tl.set(navDot, { opacity: 1 }, f(1118));
-      tl.to(nav, { p: 0.62, duration: f(132), ease: "sine.inOut", onUpdate: placeNav }, f(1118));
-      rise(tl, "#prot-title", f(1125));
+      reveal(tl, "#prot-title", f(1125));
       rise(tl, "#prot-sub", f(1150));
       tl.fromTo("#ring1", { opacity: 0.6, scale: 1 }, { opacity: 0, scale: 1.9, duration: 1.3, ease: "power2.out", immediateRender: false }, f(1268));
       tl.fromTo("#ring2", { opacity: 0.6, scale: 1 }, { opacity: 0, scale: 1.9, duration: 1.3, ease: "power2.out", immediateRender: false }, f(1293));
@@ -503,6 +468,10 @@
       rise(tl, "#sos-text", f(1275), 0.8, 18);
 
       // Shot 7, arrival and end card (f1350-1625)
+      tl.set("#m-safe-path", { strokeDashoffset: 0 }, f(1349));
+      tl.set("#start-dot", { opacity: 0 }, f(1349));
+      tl.set(navDot, { opacity: 1 }, f(1349));
+      tl.set("#dest-dot", { opacity: 1, scale: 1 }, f(1349));
       tl.set("#world, #rworld", { x: -451, y: 232, scale: 1.35, opacity: 1 }, f(1350));
       tl.set("#scrim", { opacity: 1 }, f(1350));
       tl.set(nav, { p: 0.86, onUpdate: placeNav }, f(1349));
@@ -510,17 +479,17 @@
       tl.to("#dest-dot", { fill: MINT, stroke: MINT, duration: 0.4, ease: "power2.out" }, f(1375));
       tl.fromTo("#dest-ring", { opacity: 0.9, scale: 1, transformOrigin: "1400px 305px" }, { opacity: 0, scale: 3.2, duration: 1.2, ease: "power2.out", immediateRender: false }, f(1375));
       tl.to(navDot, { opacity: 0, duration: 0.3 }, f(1375));
-      rise(tl, "#arr-title", f(1358));
+      reveal(tl, "#arr-title", f(1358));
       rise(tl, "#arr-sub", f(1378));
       tl.to(["#arr-title", "#arr-sub"], { opacity: 0, duration: 0.6, ease: "power2.in" }, f(1440));
       tl.to("#world, #rworld", { opacity: 0, duration: 0.9, ease: "power2.inOut" }, f(1440));
       tl.to("#scrim", { opacity: 0, duration: 0.9, ease: "power2.inOut" }, f(1440));
-      // The phone turns from its back (visible once the map has gone, f1454) and settles at b62 (f1550); the text column lands on
-      // b59 to b61, so everything is still for the last 2.4 s.
+      // The phone turns from its back (visible once the map has gone, f1454) and settles at b62 (f1550) as the
+      // real route ribbon finishes drawing on its screen; the text column lands on b59 to b61.
       tl.fromTo("#v-end", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, f(1454));
       rise(tl, "#lockup", f(1475), 0.9, 24);
-      rise(tl, "#tagline", f(1500), 0.9, 30);
-      rise(tl, "#subline", f(1512), 0.8, 20);
+      reveal(tl, "#tagline", f(1500), 1.0, f(5));
+      rise(tl, "#subline", f(1515), 0.8, 20);
       rise(tl, "#footer", f(1525), 0.8, 16);
 
       window.__timelines["main"] = tl;
