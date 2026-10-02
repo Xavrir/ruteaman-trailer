@@ -1,0 +1,8 @@
+node_modules/
+out/*.mp4
+out/work-*
+out/review/
+renders/
+snapshots/
+.vendor/
+.hyperframes/
