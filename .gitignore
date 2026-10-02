@@ -6,3 +6,7 @@ renders/
 snapshots/
 .vendor/
 .hyperframes/
+out/*.webm
+out/.*transaction*
+blender/render/
+.transcode-cache/

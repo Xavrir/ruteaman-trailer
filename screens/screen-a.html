@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=2340" />
+    <title>RuteAman phone screen A, hook</title>
+    <script src="../assets/vendor/gsap.min.js"></script>
+    <script src="route.js"></script>
+    <link rel="stylesheet" href="screen.css" />
+    <style>
+      @font-face { font-family: "Inter"; src: url("../assets/fonts/Inter-Regular.ttf") format("truetype"); font-weight: 400; }
+      @font-face { font-family: "Inter"; src: url("../assets/fonts/Inter-Medium.ttf") format("truetype"); font-weight: 500; }
+      @font-face { font-family: "Inter"; src: url("../assets/fonts/Inter-SemiBold.ttf") format("truetype"); font-weight: 600; }
+      @font-face { font-family: "Inter"; src: url("../assets/fonts/Inter-Bold.ttf") format("truetype"); font-weight: 700; }
+      @font-face { font-family: "Inter Display"; src: url("../assets/fonts/InterDisplay-SemiBold.ttf") format("truetype"); font-weight: 600; }
+      @font-face { font-family: "Inter Display"; src: url("../assets/fonts/InterDisplay-Bold.ttf") format("truetype"); font-weight: 700; }
+      /* map-tall at 1.15x, the dot (map-wide 735,860) lands on screen (540,1702) */
+      #a-map { transform: translate(-305.25px, 0px) scale(1.15); }
+      #a-dot { position: absolute; inset: 0; width: 1080px; height: 2340px; overflow: visible; }
+      #a-sheet { height: 365px; }
+      #a-search {
+        position: absolute; left: 48px; right: 48px; top: 74px; height: 150px; border-radius: 48px;
+        background: var(--fill); display: flex; align-items: center; gap: 30px; padding-left: 44px;
+        font-size: 58px; font-weight: 400; color: var(--label3);
+      }
+      #a-search svg { width: 64px; height: 64px; stroke: var(--label3); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="screen-a" data-start="0" data-duration="6.8333" data-width="1080" data-height="2340">
+      <div class="panel">
+        <div class="map" id="a-map"><img id="a-map-img" src="img/map-tall.jpg" alt="" /></div>
+        <svg id="a-dot" viewBox="0 0 1080 2340">
+          <g transform="translate(540 1702)">
+            <g id="a-dot-scale">
+              <circle r="92" fill="#fff" fill-opacity="0.16" />
+              <circle id="a-pulse1" r="92" fill="none" stroke="#fff" stroke-opacity="0.75" stroke-width="5" opacity="0" />
+              <circle id="a-pulse2" r="92" fill="none" stroke="#fff" stroke-opacity="0.75" stroke-width="5" opacity="0" />
+              <circle r="36" fill="#fff" stroke="#0c0c0d" stroke-width="12" />
+            </g>
+          </g>
+        </svg>
+        <div class="topfade"></div>
+        <div class="ctl" id="a-ctl1" style="right: 48px; top: 236px">
+          <svg class="ico" width="72" height="72" viewBox="0 0 24 24"><path d="M12 3.5 21 8l-9 4.5L3 8z" /><path d="m3 12 9 4.5 9-4.5" /><path d="m3 16 9 4.5 9-4.5" /></svg>
+        </div>
+        <div class="ctl" id="a-ctl2" style="right: 48px; top: 414px">
+          <svg class="ico" width="72" height="72" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5" /><circle cx="12" cy="12" r="2" /><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" /></svg>
+        </div>
+        <div class="sheet" id="a-sheet">
+          <div class="grabber"></div>
+          <div id="a-search">
+            <svg class="ico" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 5 5" /></svg>
+            <span>Cari tujuan atau alamat</span>
+          </div>
+          <div class="home-ind"></div>
+        </div>
+        <div class="status">
+          <div class="time num">22.47</div>
+          <div class="icons">
+            <svg width="52" height="36" viewBox="0 0 26 18"><rect x="0" y="12" width="4.5" height="6" rx="1.2" /><rect x="7" y="8" width="4.5" height="10" rx="1.2" /><rect x="14" y="4" width="4.5" height="14" rx="1.2" /><rect x="21" y="0" width="4.5" height="18" rx="1.2" /></svg>
+            <svg width="50" height="36" viewBox="0 0 25 18"><path d="M12.5 17.5 16 13.3a5.4 5.4 0 0 0-7 0z" /><path d="M5.2 9.7a11 11 0 0 1 14.6 0l-2.2 2.5a7.6 7.6 0 0 0-10.2 0z" /><path d="M1.5 5.6a16.6 16.6 0 0 1 22 0l-2.2 2.5a13.2 13.2 0 0 0-17.6 0z" /></svg>
+            <svg width="76" height="36" viewBox="0 0 38 18"><rect x="0.8" y="0.8" width="32" height="16.4" rx="4.6" fill="none" stroke="#fff" stroke-opacity="0.45" stroke-width="1.6" /><rect x="3.4" y="3.4" width="21" height="11.2" rx="2.6" /><path d="M35 6v6a2.6 2.6 0 0 0 0-6z" fill-opacity="0.45" /></svg>
+          </div>
+        </div>
+        <div class="punch"></div>
+      </div>
+    </div>
+    <script>
+      const f = (n) => n / 30;
+      const tl = gsap.timeline({ paused: true });
+      [["#a-pulse1", 50], ["#a-pulse2", 125]].forEach(([id, at]) =>
+        tl.fromTo(id, { opacity: 1, scale: 0.4, transformOrigin: "50% 50%" }, { opacity: 0, scale: 1.7, duration: 1.6, ease: "power2.out", immediateRender: false }, f(at)));
+      // The camera pushes in from f164 and lands at f194. Shrinking the dot keeps it a constant size on the film frame,
+      // and the map dims to the trailer's world-map brightness so the handoff at b8 matches.
+      tl.to("#a-dot-scale", { scale: 0.54, transformOrigin: "50% 50%", duration: f(30), ease: "power4.inOut" }, f(164));
+      tl.fromTo("#a-map-img", { filter: "grayscale(0.85) brightness(1) contrast(1.05)" }, { filter: "grayscale(0.85) brightness(0.5) contrast(1.05)", duration: f(30), ease: "power4.inOut" }, f(164));
+      // The sheet and map controls leave as the camera dives in, so only the map meets the world map at b8.
+      tl.fromTo("#a-sheet", { y: 0 }, { y: 380, duration: f(26), ease: "power4.inOut" }, f(164));
+      tl.to(["#a-ctl1", "#a-ctl2"], { opacity: 0, duration: f(18), ease: "power2.in" }, f(164));
+      window.__timelines["screen-a"] = tl;
+    </script>
+  </body>
+</html>

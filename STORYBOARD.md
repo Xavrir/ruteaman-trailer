@@ -19,11 +19,11 @@ One idea: **you get home calm, because the route is chosen for safety.**
 
 ## Shots
 
-### 1. Hook, 0.00 to 6.67 s (beats 0 to 8)
-- **Visual:** a blurred, near-black city map. A phone on the right shows a dark map, the time `22.47` and a white "you are here" dot with two soft pulses.
+### 1. Hook, 0.00 to 6.67 s (beats 0 to 8), 3D shot 1
+- **Visual:** a blurred, near-black city map. A 3D phone on the right (Screen A: night map, `22.47`, white "you are here" dot with two pulses, collapsed sheet "Cari tujuan atau alamat").
 - **Text:** "Pulang malam?" (b1), then "Jalan mana yang aman?" (b4). The first line then dims to grey.
-- **Motion:** the phone rises in. At b7 the camera pushes through the phone screen (scale 5, ease-in), and the full-size map appears at b8.
-- **Why:** the screen is the only bright object, so it reads as a phone glowing at night without any glow effect. Dimming the first line moves focus to the real question. The push-through hands the dot to the next shot (the dot stays in the same place on screen).
+- **Motion:** the screen wakes first (f6 to f34), then the rim light catches the frame edge, then the soft key fills it in. The phone turns 15° toward the camera (yaw -28° to -13°) over the shot. From f164 the camera pushes into the dot (`power4.inOut`-like Bezier) and lands at f194; the sheet and map controls slide away on the screen during the push. The world map fades in under the phone and the bezel dissolves (f186 to f202), then the map settles to its problem-shot framing from b8.
+- **Why:** the screen is the only bright object, so it reads as a phone glowing at night without any glow effect. The 3/4 turn gives the phone a physical presence before the story moves into the map. The phone's map *is* the world map: Blender exports the dot position and screen scale for every frame of the push (`blender/hook-align.json`), and `index.html` places the world map on the same pixels, so the map seems to spill out of the screen at b8.
 
 ### 2. Problem, 6.67 to 13.33 s (beats 8 to 16)
 - **Visual:** the map settles from 1.15x to 1.0x. A plain white route (an ordinary map app's fastest route) draws from the dot to home through back streets. That area darkens. Pills: "Jalan sepi, minim lampu" (b11) and "13 mnt" (b12).
@@ -50,14 +50,29 @@ One idea: **you get home calm, because the route is chosen for safety.**
 - **Why:** the same white line from shot 2 now shows its true risk. That is the turn of the story. The payoff is the longest hold in the film after the end card, because it is the claim to remember. The small note keeps the number honest: it is a prototype scenario and a relative risk.
 
 ### 6. Protection, 36.67 to 45.00 s (beats 44 to 54)
-- **Beat A, Pelindung aktif (b44 to b50):** the camera pushes in (1.2x). A white dot travels the mint route, and the stretch already travelled dims behind it. Text: "Pelindung aktif" / "Lokasimu dibagikan langsung ke orang rumah."
+- **Beat A, Pelindung aktif (b44 to b50), 3D shot 2:** the map goes to black and a 3D phone floats in on the right with a gentle tilt (pitch -8°, roll -4°) and a slow 10° camera orbit. Screen B shows navigation: the mint risk ribbon with its traveled part dimmed and a moving dot, a "Belok kiri" banner counting 250 to 190 m, and a bottom sheet with "7 mnt", "Pelindung aktif", "Bagikan" and a small red SOS. The left text column is unchanged: "Pelindung aktif" / "Lokasimu dibagikan langsung ke orang rumah."
 - **Beat B, SOS (hard cut at b50):** black. A red SOS button presses (scale 0.93 and back) and sends two red rings outwards. Text: "Tekan SOS, kontak daruratmu diberi tahu."
-- **Why:** there are only two beats, per the brief. Transit, hazard reporting and check-in were cut so that the one idea stays clear. The hard cut to SOS is the only abrupt moment in the film. It means "if something goes wrong, help is one tap away", and it is the only red.
+- **Why:** there are only two beats, per the brief. Showing protection on the product itself (not on the abstract map) says "this is the app you hold"; the phone over black keeps one focal point next to the text. Transit, hazard reporting and check-in were cut so that the one idea stays clear. The hard cut to SOS is the only abrupt moment in the film. It means "if something goes wrong, help is one tap away", and it is the only red.
 
 ### 7. Arrival and end card, 45.00 to 54.17 s (beats 54 to 65)
 - **Arrival (hard cut back at b54):** a closer framing on home. The dot finishes the route at b55, the home marker fills with mint and one ring expands. Text: "Sudah sampai." / "Orang rumah sudah dikabari."
-- **End card (b58 onward):** the logo and wordmark lockup (b58), "Pulang malam, tetap tenang." (b59), "Rute terang, kabar untuk orang rumah." (b60), and "GEMASTIK 2026 · Universitas Bina Nusantara" (b61). A static hold of 2.5 s ends the film.
+- **End card, 3D shot 3 (f1440 to the end):** as the map fades, the phone turns from a 3/4 back view (the camera island and lens rings catch the rim light) through 166° to the front with Screen C: route options with "Rute Aman 22" selected (mint), "Rute Tercepat 68" and a mint "Mulai" button. It settles on b62 (f1550) on the right. The text column on the left: lockup (b59), "Pulang malam, / tetap tenang." (b60), "Rute terang, kabar untuk orang rumah.", and "GEMASTIK 2026 · Universitas Bina Nusantara" (b61). Everything is still for the last 2.4 s.
 - **Why:** the story ends where the promise ends: home, calm, and the family informed. Mint fills the destination, so the brand colour closes the arc. The tagline follows from that image.
+
+## 3D phone (Blender)
+
+| Shot | Film frames | Screen | Camera and phone |
+| --- | --- | --- | --- |
+| Hook | 0 to 204 | A: night map, dot, collapsed sheet | 3/4 turn of 15°, push into the dot, lands f194 |
+| Protection | 1090 to 1250 | B: navigation, ribbon, banner, Pelindung bar | Gentle tilt, 10° orbit |
+| End card | 1440 to 1625 | C: route options, Mulai | Hero turn back to front, settles b62, holds |
+
+There is no fourth shot: tilting the phone into the map would repeat the hook handoff.
+
+- **Phone:** generic, procedural (`blender/phone.py`). 72.5 x 152 x 8 mm, 10 mm corners, a satin graphite aluminium frame with a smooth chamfer, flat cover glass with thin even bezels (0.9 mm lip + 1.3 mm black border), a centred punch-hole, volume and power keys on the right edge, a USB-C slot, and a back camera island with two lenses and a flash. No brand's distinctive shapes.
+- **Screens:** three HyperFrames compositions in `screens/` (1080x2340, 30 fps, the app's dark tokens, a 28 pt sheet radius, Inter). They play as image-sequence textures on the glass through exact planar UVs: the active area has the texture's 1080:2340 aspect, so nothing stretches.
+- **Look:** a large soft key, two thin rims on the frame edges, a dim fill, no coloured lights. One soft strip is the only light the screen glass reflects (light linking), so reflections cross the glass as a gentle sweep and never wash out the UI. Filmic view transform, motion blur, f/2.8 to f/3.2 depth of field focused on the screen.
+- **Colour:** Filmic would dim and shift the UI, so the screen shader runs each channel through an inverse Filmic LUT (`blender/view-inverse.json`). Mint, amber and SOS red display at their token values.
 
 ## Reading-time check (3 words per second + 0.5 s)
 
@@ -72,4 +87,4 @@ One idea: **you get home calm, because the route is chosen for safety.**
 | +5 menit, risiko turun 67,6% | 2.2 s | 3.8 s |
 | Lokasimu dibagikan langsung ke orang rumah. | 2.5 s | 3.3 s |
 | Tekan SOS, kontak daruratmu diberi tahu. | 2.5 s | 2.5 s |
-| Pulang malam, tetap tenang. | 1.8 s | 5.0 s |
+| Pulang malam, tetap tenang. | 1.8 s | 4.2 s |

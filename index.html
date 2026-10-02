@@ -53,6 +53,14 @@
         -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 320px);
         mask-image: linear-gradient(90deg, transparent 0, #000 320px);
       }
+      /* Same crop with the hospital label unblurred: it matches the phone screen at the b8 handoff, then
+         fades to the blurred map before the headline needs a quiet column. */
+      #map-sharp {
+        position: absolute; left: 188px; top: -32px; width: 2095px; height: 1145px;
+        filter: grayscale(0.85) brightness(0.5) contrast(1.05);
+        -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 320px);
+        mask-image: linear-gradient(90deg, transparent 0, #000 320px);
+      }
       #routes { position: absolute; left: 188px; top: -32px; width: 2095px; height: 1145px; overflow: visible; }
       #scrim {
         position: absolute; inset: 0; opacity: 0;
@@ -68,24 +76,7 @@
         filter: grayscale(1) brightness(0.22) blur(6px);
       }
       #hook-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 55%, rgba(0,0,0,0.55) 100%); }
-      #phone {
-        position: absolute; left: 1160px; top: 120px; width: 400px; height: 840px;
-        border-radius: 68px; background: #0c0c0d; border: 2px solid #2c2c2e; padding: 14px;
-      }
-      #phone-screen {
-        position: relative; width: 100%; height: 100%; border-radius: 54px; overflow: hidden;
-        background: #000;
-      }
-      #phone-screen .shot { position: absolute; inset: 0; background: url("assets/img/map-phone.jpg") center / cover; filter: grayscale(1) brightness(0.95); }
-      #phone-screen .tint { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 34%, rgba(0,0,0,0.12) 100%); }
-      #phone-time {
-        position: absolute; left: 0; right: 0; top: 64px; text-align: center;
-        font-family: "Inter Display", sans-serif; font-weight: 600; font-size: 96px; letter-spacing: -0.02em;
-      }
-      .you { position: absolute; width: 0; height: 0; }
-      .you .halo { position: absolute; left: -40px; top: -40px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.16); }
-      .you .core { position: absolute; left: -15px; top: -15px; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 5px solid #0c0c0d; }
-      .you .pulse { position: absolute; left: -40px; top: -40px; width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.7); opacity: 0; }
+      .phone3d { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
 
       /* pills */
       .pill {
@@ -131,13 +122,14 @@
       .ring { position: absolute; left: 820px; top: 290px; width: 280px; height: 280px; border-radius: 50%; border: 3px solid var(--sos); opacity: 0; }
       #sos-text { position: absolute; left: 0; right: 0; top: 700px; text-align: center; font-size: 52px; font-weight: 500; }
 
-      /* end card */
-      #lockup { position: absolute; left: 0; right: 0; top: 270px; display: flex; justify-content: center; align-items: center; gap: 26px; }
-      #lockup .mark { width: 112px; height: 112px; background: url("assets/img/logo.png") center / contain no-repeat; }
-      #lockup .wm { font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 72px; letter-spacing: -0.02em; }
-      #tagline { position: absolute; left: 0; right: 0; top: 470px; text-align: center; font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 112px; letter-spacing: -0.03em; }
-      #subline { position: absolute; left: 0; right: 0; top: 628px; text-align: center; font-size: 48px; font-weight: 500; color: var(--label2); }
-      #footer { position: absolute; left: 0; right: 0; top: 920px; text-align: center; font-size: 40px; font-weight: 500; color: var(--label3); }
+      /* end card: text column left, the 3D phone settles on the right */
+      #lockup { position: absolute; left: 120px; top: 262px; display: flex; align-items: center; gap: 22px; }
+      #lockup .mark { width: 96px; height: 96px; background: url("assets/img/logo.png") center / contain no-repeat; }
+      #lockup .wm { font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 64px; letter-spacing: -0.02em; }
+      #tagline { position: absolute; left: 120px; top: 410px; width: 900px; font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 104px; line-height: 1.04; letter-spacing: -0.03em; }
+      #tagline .line { display: block; }
+      #subline { position: absolute; left: 120px; top: 660px; width: 860px; font-size: 46px; font-weight: 500; color: var(--label2); }
+      #footer { position: absolute; left: 120px; top: 930px; font-size: 36px; font-weight: 500; color: var(--label3); }
 
       /* brand */
       #brand-logo { position: absolute; left: 810px; top: 250px; width: 300px; height: 300px; }
@@ -151,6 +143,7 @@
 
       <div id="world">
         <img id="map" src="assets/img/map-wide.jpg" alt="" />
+        <img id="map-sharp" src="assets/img/map-wide-sharp.jpg" alt="" />
       </div>
       <div id="scrim"></div>
       <div id="rworld">
@@ -187,16 +180,6 @@
       <section id="hook" class="clip" data-start="0" data-duration="6.8333" data-track-index="1">
         <div id="hook-bg"></div>
         <div id="hook-shade"></div>
-        <div id="phone">
-          <div id="phone-screen">
-            <div class="shot"></div>
-            <div class="tint"></div>
-            <div id="phone-time" class="num">22.47</div>
-            <div class="you" id="phone-you" style="left: 186px; top: 506px">
-              <div class="halo"></div><div class="pulse" id="pulse1"></div><div class="pulse" id="pulse2"></div><div class="core"></div>
-            </div>
-          </div>
-        </div>
         <div class="headline" id="hook-text" style="top: 380px; width: 900px">
           <span class="line" id="hook-l1">Pulang malam?</span>
           <span class="line" id="hook-l2">Jalan mana yang aman?</span>
@@ -292,10 +275,15 @@
 
       <section id="end" class="clip" data-start="48.3333" data-duration="5.8333" data-track-index="3">
         <div id="lockup"><div class="mark"></div><div class="wm">Rute<span class="mint">Aman</span></div></div>
-        <div id="tagline">Pulang malam, tetap tenang.</div>
+        <div id="tagline"><span class="line">Pulang malam,</span><span class="line">tetap tenang.</span></div>
         <div id="subline">Rute terang, kabar untuk orang rumah.</div>
         <div id="footer">GEMASTIK 2026 · Universitas Bina Nusantara</div>
       </section>
+
+      <!-- 3D phone renders (blender/phone.py), VP9 with alpha, timed on film frames -->
+      <video id="v-hook" class="clip phone3d" src="assets/3d/phone-hook.webm" muted playsinline data-layout-allow-occlusion data-start="0" data-duration="6.8333" data-track-index="4"></video>
+      <video id="v-protect" class="clip phone3d" src="assets/3d/phone-protect.webm" muted playsinline data-layout-allow-occlusion data-start="36.3333" data-duration="5.3333" data-track-index="4"></video>
+      <video id="v-end" class="clip phone3d" src="assets/3d/phone-end.webm" muted playsinline data-layout-allow-occlusion data-start="48" data-duration="6.1667" data-track-index="4"></video>
     </div>
 
     <script>
@@ -417,21 +405,31 @@
 
       // Shot 1, hook (f0-200)
       tl.fromTo("#hook-bg", { opacity: 0 }, { opacity: 1, duration: 1.2, ease: "power2.out" }, 0);
-      tl.fromTo("#phone", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 1.4, ease: OUT }, f(10));
-      [["#pulse1", 50], ["#pulse2", 125]].forEach(([id, at]) =>
-        tl.fromTo(id, { opacity: 0.8, scale: 0.5 }, { opacity: 0, scale: 1.6, duration: 1.6, ease: "power2.out", immediateRender: false }, f(at)));
       rise(tl, "#hook-l1", f(25));
       rise(tl, "#hook-l2", f(100));
       tl.to("#hook-l1", { color: "#6e6e73", duration: 0.6, ease: "power2.out" }, f(100));
       tl.to("#hook-text", { opacity: 0, x: -30, duration: 0.5, ease: "power2.in" }, f(168));
-      tl.to("#phone", { scale: 5, transformOrigin: "200px 520px", duration: f(27), ease: "power3.in" }, f(175));
-      tl.to("#phone", { opacity: 0, duration: f(12), ease: "none" }, f(190));
+      // The 3D camera lands in the phone screen at f194. Its map is the world map, so the world fades in
+      // under the phone and the bezel dissolves away.
+      tl.fromTo("#v-hook", { opacity: 1 }, { opacity: 0, duration: f(8), ease: "none", immediateRender: false }, f(194));
       tl.to("#hook-bg", { opacity: 0, duration: f(25), ease: "none" }, f(175));
+      tl.to("#hook-shade", { opacity: 0, duration: f(18), ease: "none" }, f(176));
+      tl.to("#map-sharp", { opacity: 0, duration: 1.0, ease: "power1.inOut" }, f(206));
 
       // Shot 2, problem (f200-400): same map the whole middle act uses
       tl.set("#world, #rworld", { transformOrigin: "960px 540px" }, 0);
-      tl.fromTo("#world, #rworld", { opacity: 0 }, { opacity: 1, duration: f(18), ease: "none" }, f(184));
-      tl.fromTo("#world, #rworld", { x: 468, y: -201, scale: 1.15 }, { x: 0, y: 0, scale: 1, duration: 1.6, ease: OUT }, f(186));
+      tl.fromTo("#world, #rworld", { opacity: 0 }, { opacity: 1, duration: f(10), ease: "none" }, f(186));
+      // Frame-by-frame match to the 3D screen (blender/hook-align.json): [frame, dot x, dot y, frame px per
+      // screen px]. The screen shows map-wide at 1.15 screen px per map px; the map image sits at 0.9699.
+      const HANDOFF = [[184, 1359.36, 708.47, 0.67775], [185, 1359.46, 711.61, 0.73006], [186, 1359.56, 714.55, 0.77906], [187, 1359.66, 717.22, 0.82368], [188, 1359.75, 719.58, 0.86304], [189, 1359.82, 721.59, 0.89653], [190, 1359.89, 723.22, 0.92374], [191, 1359.94, 724.47, 0.94454], [192, 1359.97, 725.34, 0.95898], [193, 1359.99, 725.84, 0.96732], [194, 1360.0, 726.0, 0.97], [195, 1360.0, 726.0, 0.97], [196, 1360.0, 726.0, 0.97], [197, 1360.0, 726.0, 0.97], [198, 1360.0, 726.0, 0.97], [199, 1360.0, 726.0, 0.97], [200, 1360.0, 726.0, 0.97]];
+      const K0 = 2095 / 2160;
+      const startBase = [188 + START[0] * K0, -32 + START[1] * K0];
+      const worldAt = ([, X, Y, m]) => {
+        const scale = (m * 1.15) / K0;
+        return { x: X - 960 - scale * (startBase[0] - 960), y: Y - 540 - scale * (startBase[1] - 540), scale };
+      };
+      HANDOFF.forEach((row) => { if (row[0] < 200) tl.set("#world, #rworld", worldAt(row), f(row[0])); });
+      tl.fromTo("#world, #rworld", worldAt(HANDOFF[HANDOFF.length - 1]), { x: 0, y: 0, scale: 1, duration: 1.6, ease: OUT, immediateRender: false }, f(200));
       tl.fromTo("#scrim", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power2.out" }, f(205));
       tl.fromTo("#dest-dot", { opacity: 0, scale: 0.4, transformOrigin: "1400px 305px" }, { opacity: 1, scale: 1, duration: 0.7, ease: OUT }, f(225));
       rise(tl, "#prob-l1", f(215));
@@ -491,9 +489,8 @@
 
       // Shot 6, protection (f1100-1350): live sharing, then SOS
       tl.to("#rib-fast", { opacity: 0, duration: 0.6, ease: "power2.inOut" }, f(1090));
-      tl.to("#world, #rworld", { opacity: 1, duration: 0.8, ease: "power2.inOut" }, f(1092));
-      tl.to("#scrim", { opacity: 1, duration: 0.8, ease: "power2.inOut" }, f(1092));
-      tl.to("#world, #rworld", { x: -58, y: 32, scale: 1.2, duration: 1.6, ease: MOVE }, f(1100));
+      tl.to("#world, #rworld", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, f(1090));
+      tl.fromTo("#v-protect", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, f(1100));
       tl.set("#start-dot", { opacity: 0 }, f(1118));
       tl.set(navDot, { opacity: 1 }, f(1118));
       tl.to(nav, { p: 0.62, duration: f(132), ease: "sine.inOut", onUpdate: placeNav }, f(1118));
@@ -506,7 +503,8 @@
       rise(tl, "#sos-text", f(1275), 0.8, 18);
 
       // Shot 7, arrival and end card (f1350-1625)
-      tl.set("#world, #rworld", { x: -451, y: 232, scale: 1.35 }, f(1350));
+      tl.set("#world, #rworld", { x: -451, y: 232, scale: 1.35, opacity: 1 }, f(1350));
+      tl.set("#scrim", { opacity: 1 }, f(1350));
       tl.set(nav, { p: 0.86, onUpdate: placeNav }, f(1349));
       tl.to(nav, { p: 1, duration: f(25), ease: "power2.out", onUpdate: placeNav }, f(1350));
       tl.to("#dest-dot", { fill: MINT, stroke: MINT, duration: 0.4, ease: "power2.out" }, f(1375));
@@ -517,10 +515,13 @@
       tl.to(["#arr-title", "#arr-sub"], { opacity: 0, duration: 0.6, ease: "power2.in" }, f(1440));
       tl.to("#world, #rworld", { opacity: 0, duration: 0.9, ease: "power2.inOut" }, f(1440));
       tl.to("#scrim", { opacity: 0, duration: 0.9, ease: "power2.inOut" }, f(1440));
-      rise(tl, "#lockup", f(1460), 1.0, 24);
-      rise(tl, "#tagline", f(1475), 1.1, 30);
-      rise(tl, "#subline", f(1500), 0.9, 20);
-      rise(tl, "#footer", f(1525), 0.9, 16);
+      // The phone turns from its back (visible once the map has gone, f1454) and settles at b62 (f1550); the text column lands on
+      // b59 to b61, so everything is still for the last 2.4 s.
+      tl.fromTo("#v-end", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, f(1454));
+      rise(tl, "#lockup", f(1475), 0.9, 24);
+      rise(tl, "#tagline", f(1500), 0.9, 30);
+      rise(tl, "#subline", f(1512), 0.8, 20);
+      rise(tl, "#footer", f(1525), 0.8, 16);
 
       window.__timelines["main"] = tl;
       tl.seek(0);

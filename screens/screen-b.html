@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=2340" />
+    <title>RuteAman phone screen B, protection</title>
+    <script src="../assets/vendor/gsap.min.js"></script>
+    <script src="route.js"></script>
+    <link rel="stylesheet" href="screen.css" />
+    <style>
+      @font-face { font-family: "Inter"; src: url("../assets/fonts/Inter-Regular.ttf") format("truetype"); font-weight: 400; }
+      @font-face { font-family: "Inter"; src: url("../assets/fonts/Inter-Medium.ttf") format("truetype"); font-weight: 500; }
+      @font-face { font-family: "Inter"; src: url("../assets/fonts/Inter-SemiBold.ttf") format("truetype"); font-weight: 600; }
+      @font-face { font-family: "Inter"; src: url("../assets/fonts/Inter-Bold.ttf") format("truetype"); font-weight: 700; }
+      @font-face { font-family: "Inter Display"; src: url("../assets/fonts/InterDisplay-SemiBold.ttf") format("truetype"); font-weight: 600; }
+      @font-face { font-family: "Inter Display"; src: url("../assets/fonts/InterDisplay-Bold.ttf") format("truetype"); font-weight: 700; }
+      /* map-tall at 1x, the route centre (map-wide 1173,582) lands on screen (540,1110) */
+      #b-map { transform: translate(-633px, -92px); }
+      #b-banner {
+        position: absolute; left: 40px; right: 40px; top: 172px; height: 300px; border-radius: 68px;
+        background: rgba(28, 28, 30, 0.97); display: flex; align-items: center; gap: 40px; padding: 0 56px;
+      }
+      #b-banner .turn { width: 150px; height: 150px; flex: none; }
+      #b-banner .turn svg { width: 150px; height: 150px; stroke-width: 2.2; }
+      #b-dist { font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 108px; line-height: 1; letter-spacing: -0.02em; }
+      #b-street { margin-top: 18px; font-size: 48px; font-weight: 500; color: var(--label2); white-space: nowrap; }
+      #b-sheet { height: 760px; }
+      #b-eta { position: absolute; left: 64px; top: 80px; }
+      #b-eta .big { font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 108px; line-height: 1.05; letter-spacing: -0.02em; }
+      #b-eta .small { margin-top: 14px; font-size: 54px; font-weight: 400; color: var(--label2); }
+      #b-sep { position: absolute; left: 64px; right: 0; top: 318px; height: 3px; background: var(--separator); }
+      #b-guard { position: absolute; left: 64px; right: 48px; top: 354px; display: flex; align-items: center; gap: 36px; }
+      #b-guard .tile { width: 116px; height: 116px; border-radius: 34px; background: var(--accent-tint); display: grid; place-items: center; flex: none; }
+      #b-guard .tile svg { width: 70px; height: 70px; stroke: var(--accent); stroke-width: 2; }
+      #b-guard .t1 { font-size: 58px; font-weight: 600; }
+      #b-guard .t2 { margin-top: 6px; font-size: 48px; font-weight: 400; color: var(--label2); }
+      #b-share {
+        position: absolute; left: 48px; top: 532px; width: 784px; height: 140px; border-radius: 70px; background: var(--fill);
+        display: flex; align-items: center; justify-content: center; gap: 26px; font-size: 58px; font-weight: 600;
+      }
+      #b-share svg { width: 64px; height: 64px; stroke-width: 2; }
+      #b-sos {
+        position: absolute; right: 48px; top: 532px; width: 140px; height: 140px; border-radius: 50%; background: var(--sos);
+        display: grid; place-items: center; font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 46px; letter-spacing: 0.01em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="screen-b" data-start="0" data-duration="5.5" data-width="1080" data-height="2340">
+      <div class="panel">
+        <div class="map" id="b-map">
+          <img src="img/map-tall.jpg" alt="" style="filter: grayscale(0.85) brightness(0.8) contrast(1.05)" />
+          <svg id="b-svg" viewBox="0 0 1800 1800">
+            <g transform="translate(0 620)">
+              <g id="b-rib"></g>
+              <path id="b-traveled" fill="none" stroke="#000" stroke-opacity="0.62" stroke-width="42" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="1400" cy="305" r="20" fill="#000" stroke="#fff" stroke-width="9" />
+              <g id="b-nav"></g>
+            </g>
+          </svg>
+        </div>
+        <div class="topfade"></div>
+        <div id="b-banner">
+          <div class="turn"><svg class="ico" viewBox="0 0 24 24"><path d="M15 20v-8.5a3 3 0 0 0-3-3H5.5" /><path d="m9 4.5-4 4 4 4" /></svg></div>
+          <div>
+            <div id="b-dist" class="num">250 m</div>
+            <div id="b-street">Belok kiri ke Jl. Kebon Kacang</div>
+          </div>
+        </div>
+        <div class="sheet" id="b-sheet">
+          <div class="grabber"></div>
+          <div id="b-eta">
+            <div class="big num">7 mnt</div>
+            <div class="small num">0,6 km · tiba 23.00</div>
+          </div>
+          <div id="b-sep"></div>
+          <div id="b-guard">
+            <div class="tile"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3 19.5 6v5.6c0 4.4-3.1 8-7.5 9.4-4.4-1.4-7.5-5-7.5-9.4V6z" /><path d="m8.8 12 2.3 2.3 4.2-4.6" /></svg></div>
+            <div>
+              <div class="t1">Pelindung aktif</div>
+              <div class="t2">Lokasimu dibagikan ke Ibu</div>
+            </div>
+          </div>
+          <div id="b-share">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M12 3.5v11" /><path d="m7.5 8 4.5-4.5L16.5 8" /><path d="M5 12.5v6.5a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5v-6.5" /></svg>
+            <span>Bagikan</span>
+          </div>
+          <div id="b-sos">SOS</div>
+          <div class="home-ind"></div>
+        </div>
+        <div class="status">
+          <div class="time num">22.53</div>
+          <div class="icons">
+            <svg width="52" height="36" viewBox="0 0 26 18"><rect x="0" y="12" width="4.5" height="6" rx="1.2" /><rect x="7" y="8" width="4.5" height="10" rx="1.2" /><rect x="14" y="4" width="4.5" height="14" rx="1.2" /><rect x="21" y="0" width="4.5" height="18" rx="1.2" /></svg>
+            <svg width="50" height="36" viewBox="0 0 25 18"><path d="M12.5 17.5 16 13.3a5.4 5.4 0 0 0-7 0z" /><path d="M5.2 9.7a11 11 0 0 1 14.6 0l-2.2 2.5a7.6 7.6 0 0 0-10.2 0z" /><path d="M1.5 5.6a16.6 16.6 0 0 1 22 0l-2.2 2.5a13.2 13.2 0 0 0-17.6 0z" /></svg>
+            <svg width="76" height="36" viewBox="0 0 38 18"><rect x="0.8" y="0.8" width="32" height="16.4" rx="4.6" fill="none" stroke="#fff" stroke-opacity="0.45" stroke-width="1.6" /><rect x="3.4" y="3.4" width="18" height="11.2" rx="2.6" /><path d="M35 6v6a2.6 2.6 0 0 0 0-6z" fill-opacity="0.45" /></svg>
+          </div>
+        </div>
+        <div class="punch"></div>
+      </div>
+    </div>
+    <script>
+      const path = RA.ribbon(document.getElementById("b-rib"), 26);
+      const len = path.getTotalLength();
+      const traveled = document.getElementById("b-traveled");
+      traveled.setAttribute("d", path.getAttribute("d"));
+      traveled.style.strokeDasharray = `${len} ${len}`;
+      const navDot = RA.dot(document.getElementById("b-nav"), 0, 0, 26, 66);
+      const nav = { p: 0.3 };
+      const place = () => {
+        traveled.style.strokeDashoffset = `${len * (1 - nav.p)}`;
+        const pt = path.getPointAtLength(nav.p * len);
+        navDot.setAttribute("transform", `translate(${pt.x} ${pt.y})`);
+      };
+      place();
+      const dist = document.getElementById("b-dist");
+      const d = { m: 250 };
+      const tl = gsap.timeline({ paused: true });
+      tl.to(nav, { p: 0.5, duration: 5.5, ease: "none", onUpdate: place }, 0);
+      tl.to(d, { m: 190, duration: 5.5, ease: "none", onUpdate: () => { dist.textContent = `${Math.round(d.m / 10) * 10} m`; } }, 0);
+      window.__timelines["screen-b"] = tl;
+    </script>
+  </body>
+</html>
