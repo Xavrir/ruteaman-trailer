@@ -103,12 +103,17 @@
       #sos-text { position: absolute; left: 0; right: 0; top: 700px; text-align: center; font-size: 52px; font-weight: 500; }
 
       /* end card: text column left, the 3D phone settles on the right */
-      #lockup { position: absolute; left: 120px; top: 262px; display: flex; align-items: center; gap: 22px; }
+      #lockup { position: absolute; left: 120px; top: 176px; display: flex; align-items: center; gap: 22px; }
       #lockup .mark { width: 96px; height: 96px; background: url("assets/img/logo.png") center / contain no-repeat; }
       #lockup .wm { font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 64px; letter-spacing: -0.02em; }
-      #tagline { position: absolute; left: 120px; top: 410px; width: 900px; font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 104px; line-height: 1.04; letter-spacing: -0.03em; }
-      #subline { position: absolute; left: 120px; top: 660px; width: 860px; font-size: 46px; font-weight: 500; color: var(--label2); }
-      #footer { position: absolute; left: 120px; top: 930px; font-size: 36px; font-weight: 500; color: var(--label3); }
+      #tagline { position: absolute; left: 120px; top: 316px; width: 900px; font-family: "Inter Display", sans-serif; font-weight: 700; font-size: 104px; line-height: 1.04; letter-spacing: -0.03em; }
+      #subline { position: absolute; left: 120px; top: 566px; width: 860px; font-size: 46px; font-weight: 500; color: var(--label2); }
+      #footer { position: absolute; left: 120px; top: 900px; font-size: 32px; font-weight: 500; color: var(--label3); }
+      #team { position: absolute; left: 120px; top: 672px; display: flex; gap: 36px; }
+      #team .member { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+      #team .face { width: 104px; height: 104px; border-radius: 50%; background: center / cover no-repeat; }
+      #team .name { font-size: 24px; font-weight: 500; line-height: 1.25; text-align: center; color: var(--label2); }
+      #teamname { position: absolute; left: 120px; top: 952px; font-size: 32px; font-weight: 600; color: var(--label2); }
 
       /* brand */
       #brand-logo { position: absolute; left: 810px; top: 250px; width: 300px; height: 300px; }
@@ -254,7 +259,13 @@
         <div id="lockup"><div class="mark"></div><div class="wm">Rute<span class="mint">Aman</span></div></div>
         <div id="tagline"><span class="line"><span class="in">Pulang malam,</span></span><span class="line"><span class="in">tetap tenang.</span></span></div>
         <div id="subline">Rute terang, kabar untuk orang rumah.</div>
+        <div id="team">
+          <div class="member"><div class="face" style="background-image:url(assets/team/rizky.png)"></div><div class="name">Rizky<br>Mirzaviandy. P</div></div>
+          <div class="member"><div class="face" style="background-image:url(assets/team/jahns.png)"></div><div class="name">Jahns<br>Lewi Gerard. N</div></div>
+          <div class="member"><div class="face" style="background-image:url(assets/team/ikbar.png)"></div><div class="name">Ikbar<br>Faiz</div></div>
+        </div>
         <div id="footer">GEMASTIK 2026 · Universitas Bina Nusantara</div>
+        <div id="teamname">UREEKAA dolar jgn 20k dlu pls</div>
       </section>
 
       <!-- 3D phone renders (blender/phone.py) with the real app recordings on screen, VP9 with alpha, timed on film frames -->
@@ -529,7 +540,9 @@
       rise(tl, "#lockup", f(1475), 0.9, 24);
       reveal(tl, "#tagline", f(1500), 1.0, f(5));
       rise(tl, "#subline", f(1515), 0.8, 20);
-      rise(tl, "#footer", f(1525), 0.8, 16);
+      rise(tl, "#team", f(1522), 0.8, 16);
+      rise(tl, "#footer", f(1532), 0.8, 16);
+      rise(tl, "#teamname", f(1540), 0.8, 16);
 
       window.__timelines["main"] = tl;
       tl.seek(0);
